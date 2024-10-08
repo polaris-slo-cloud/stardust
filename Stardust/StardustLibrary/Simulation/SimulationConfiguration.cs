@@ -1,0 +1,23 @@
+﻿namespace StardustLibrary.Simulation;
+
+public class SimulationConfiguration
+{
+    /// <summary>
+    /// StepLength in seconds
+    /// </summary>
+    public double StepLength { get; set; }
+
+    /// <summary>
+    /// Gets or sets the interval at which the simulation advances by one StepLength.
+    /// </summary>
+    /// <remarks>
+    /// - `1` represents advancing the simulation by 1 StepLength per second. <br />
+    /// - `0` stands for running the simulation as fast as possible. <br />
+    /// - `-1` indicates that the simulation is controlled manually.
+    /// </remarks>
+    public double StepInterval { get; set; }
+
+    public required string SatelliteDataSource { get; set; }
+
+    public required string SatelliteDataSourceType { get; set; }
+}
