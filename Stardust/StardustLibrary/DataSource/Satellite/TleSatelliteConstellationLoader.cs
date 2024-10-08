@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ public class TleSatelliteConstellationLoader : ISatelliteConstellationLoader
         using var reader = new StreamReader(stream, leaveOpen: false);
 
         string? line1, line2;
-        while ((line1 = await reader.ReadLineAsync()) != null)
+        while ((line1 = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
         {
             if (string.IsNullOrWhiteSpace(line1))
             {
@@ -38,13 +39,15 @@ public class TleSatelliteConstellationLoader : ISatelliteConstellationLoader
             {
                 name = line1.Trim();
 
-                if ((line1 = await reader.ReadLineAsync()) == null || !line1.StartsWith('1'))
+                line1 = await reader.ReadLineAsync().ConfigureAwait(false);
+                if (line1 == null || !line1.StartsWith('1'))
                 {
                     throw new ApplicationException(CANNOT_PARSE);
                 }
             }
 
-            if ((line2 = await reader.ReadLineAsync()) == null || !line2.StartsWith('2'))
+            line2 = await reader.ReadLineAsync().ConfigureAwait(false);
+            if (line2 == null || !line2.StartsWith('2'))
             {
                 throw new ApplicationException(CANNOT_PARSE);
             }

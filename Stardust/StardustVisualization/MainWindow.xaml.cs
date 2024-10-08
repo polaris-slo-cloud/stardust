@@ -27,7 +27,7 @@ namespace StardustVisualization
         {
             // Create a collection of 3D points to plot (example coordinates)
 
-            var satellites = new TleSatelliteConstellationLoader().Load(File.OpenRead("starlink.tle"));
+            var satellites = (new TleSatelliteConstellationLoader().Load(File.OpenRead("starlink.tle"))).Result;
             List<GroundStation> groundStations =
             [
                 new GroundStation("Vienna", 16.3738, 48.2082),           // Austria

@@ -32,7 +32,7 @@ public class Satellite : EarthCenteredObject
         MeanMotion = meanMotion;
         Epoch = epoch;
 
-        UpdatePosition(simulationTime);
+        UpdatePosition(simulationTime).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch)

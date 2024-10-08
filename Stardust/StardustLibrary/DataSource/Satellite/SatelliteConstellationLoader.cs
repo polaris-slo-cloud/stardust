@@ -35,8 +35,8 @@ public class SatelliteConstellationLoader
         else if (dataSource.StartsWith("http://") || dataSource.StartsWith("https://"))
         {
             using var client = new HttpClient();
-            using var response = await client.GetAsync(dataSource);
-            sourceStream = await response.Content.ReadAsStreamAsync();
+            using var response = await client.GetAsync(dataSource).ConfigureAwait(false);
+            sourceStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         }
 
         if (sourceStream == null)
@@ -49,7 +49,7 @@ public class SatelliteConstellationLoader
         var loader = constellationLoaders[sourceType];
         return loader == null
             ? throw new ArgumentException("Unsupported data source file type", nameof(dataSource))
-            : (loadedConstellations[dataSource] = await loader.Load(sourceStream));
+            : (loadedConstellations[dataSource] = await loader.Load(sourceStream).ConfigureAwait(false));
     }
 
     public void RegisterDataSourceLoader(string sourceType, ISatelliteConstellationLoader loader)
