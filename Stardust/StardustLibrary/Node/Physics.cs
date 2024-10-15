@@ -18,4 +18,14 @@ public static class Physics
     /// Earth's rotation speed in radians per second (2π / 86400 radians/second)
     /// </summary>
     public const double EARTH_ROTATION_SPEED = 2 * Math.PI / 86_400;
+
+    /// <summary>
+    /// Maximal distance for two satellites to communicate in m.
+    /// </summary>
+    public const double MAX_ISL_DISTANCE = 700_000;
+
+    /// <summary>
+    /// Speed of light in m/s.
+    /// </summary>
+    public const double SPEED_OF_LIGHT = 299_792_000;
 }

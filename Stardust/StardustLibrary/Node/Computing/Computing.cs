@@ -4,6 +4,7 @@ namespace StardustLibrary.Node.Computing;
 
 public abstract class Computing(double cpu, double memory)
 {
+    public ComputingType Type { get; set; }
     public double Cpu { get; } = cpu;
     public double Memory { get; } = memory;
 

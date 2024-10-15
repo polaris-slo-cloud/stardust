@@ -1,9 +1,11 @@
-﻿using System;
+﻿using StardustLibrary.Node.Networking;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace StardustLibrary.Node;
 
-public class Satellite : EarthCenteredObject
+public class Satellite : Node
 {
     public string Name { get; private set; }
     public double Inclination { get; private set; }  // degrees
@@ -17,8 +19,11 @@ public class Satellite : EarthCenteredObject
     public double MeanMotion { get; private set; }  // revs per day
     public double SemiMajorAxis { get; private set; }  // meters
     private DateTime Epoch { get; set; }  // TLE epoch
+    public IInterSatelliteLinkProtocol InterSatelliteLinkProtocol { get; }
+    public Router Router { get; }
+    public List<GroundLink> GroundLinks { get; } = [];
 
-    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, DateTime simulationTime)
+    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, DateTime simulationTime, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, Router router)
     {
         Name = name;
         Inclination = inclination;
@@ -31,92 +36,22 @@ public class Satellite : EarthCenteredObject
         MeanAnomaly = meanAnomaly;
         MeanMotion = meanMotion;
         Epoch = epoch;
-
+        InterSatelliteLinkProtocol = interSatelliteLinkProtocol;
+        Router = router;
+        InterSatelliteLinkProtocol.Mount(this);
+        Router.Mount(this);
         UpdatePosition(simulationTime).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
-    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch)
-        : this(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, DateTime.UtcNow)
+    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, Router router)
+        : this(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, DateTime.UtcNow, interSatelliteLinkProtocol, router)
     {
     }
 
-    /*
-    public override Task UpdatePosition(DateTime simulationTime)
+    public override async Task UpdatePosition(DateTime simTime)
     {
-        double seconds = (simulationTime - Epoch).TotalSeconds;
-        if (seconds < 0)
-        {
-            throw new ArgumentException("Simulation time must be AFTER the initial epoch time of satellite.", nameof(simulationTime));
-        }
-
-        UpdatePosition((simulationTime - Epoch).TotalSeconds);
-        return Task.CompletedTask;
-    }
-
-    private void UpdatePosition(double elapsedSeconds)
-    {
-
-        // Step 1: Calculate elapsed time since epoch in seconds
-        double deltaT = elapsedSeconds;
-
-        // Step 2: Mean motion in radians per second
-        double n = MeanMotion * 2 * Math.PI / (24 * 3600); // Mean motion (rad/s)
-
-        // Step 3: Mean anomaly at current time (M = M0 + n * deltaT)
-        double M = MeanAnomaly + n * deltaT; // Mean anomaly at simulation time
-
-        // Step 4: Solve Kepler's Equation iteratively to get the Eccentric Anomaly E
-        double E = M;
-        for (int i = 0; i < 10; i++) // Iterative method to solve E
-        {
-            E = M + Eccentricity * Math.Sin(E);
-        }
-        E = SolveKeplersEquation(M, Eccentricity);
-
-        // Step 5: Calculate the true anomaly (ν)
-        double trueAnomaly = 2 * Math.Atan2(Math.Sqrt(1 + Eccentricity) * Math.Sin(E / 2), Math.Sqrt(1 - Eccentricity) * Math.Cos(E / 2));
-        trueAnomaly = ComputeTrueAnomaly(E, Eccentricity);
-
-        // Step 6: Semi-major axis 'a' from mean motion
-        double a = Math.Pow(Physics.MU / (n * n), 1.0 / 3.0); // Semi-major axis in meters
-
-        // Step 7: Radius (r)
-        double r = a * (1 - Eccentricity * Math.Cos(E));
-
-        // Step 8: Calculate the ECI coordinates (x, y, z) in meters
-        double x = r * (Math.Cos(RightAscensionRad) * Math.Cos((ArgumentOfPerigee + trueAnomaly).DegToRad()) - Math.Sin(RightAscensionRad) * Math.Sin((ArgumentOfPerigee + trueAnomaly).DegToRad()) * Math.Cos(InclinationRad));
-        double y = r * (Math.Sin(RightAscensionRad) * Math.Cos((ArgumentOfPerigee + trueAnomaly).DegToRad()) + Math.Cos(RightAscensionRad) * Math.Sin((ArgumentOfPerigee + trueAnomaly).DegToRad()) * Math.Cos(InclinationRad));
-        double z = r * (Math.Sin((ArgumentOfPerigee + trueAnomaly).DegToRad()) * Math.Sin(InclinationRad));
-
-        Position = (x, y, z);
-    }
-
-    private double SolveKeplersEquation(double meanAnomaly, double eccentricity, double tolerance = 1e-6)
-    {
-        double E = meanAnomaly; // Initial guess: E0 = M0
-        double deltaE;
-        do
-        {
-            deltaE = (E - eccentricity * Math.Sin(E) - meanAnomaly) / (1 - eccentricity * Math.Cos(E));
-            E -= deltaE;
-        } while (Math.Abs(deltaE) > tolerance);
-
-        return E;
-    }
-
-    private double ComputeTrueAnomaly(double eccentricAnomaly, double eccentricity)
-    {
-        double cosE = Math.Cos(eccentricAnomaly);
-        double sinE = Math.Sin(eccentricAnomaly);
-
-        double sqrtOneMinusE2 = Math.Sqrt(1 - eccentricity * eccentricity);
-        double trueAnomaly = Math.Atan2(sqrtOneMinusE2 * sinE, cosE - eccentricity);
-
-        return trueAnomaly;
-    }
-    */
-    public override Task UpdatePosition(DateTime simTime)
-    {
+        await Task.Delay(0);
+        // faster without Task.Run even in parallel with all other tasks
         // 1. Calculate the time difference (Δt) in minutes
         double deltaTSeconds = (simTime - Epoch).TotalSeconds;
 
@@ -144,8 +79,6 @@ public class Satellite : EarthCenteredObject
 
         // 7. Apply orbital transformations to get ECI coordinates
         Position = ApplyOrbitalTransformations(xPrime, yPrime, zPrime);
-
-        return Task.CompletedTask;
     }
 
     // Method to normalize angle to the range [0, 2π]
@@ -205,4 +138,22 @@ public class Satellite : EarthCenteredObject
         return (xECI, yECI, zECI); // Position in ECI coordinates
     }
 
+    public Task ConfigureConstellation(List<Satellite> satellites)
+    {
+        return Task.Factory.StartNew((o) =>
+        {
+            var sats = (List<Satellite>)o!;
+            foreach (Satellite satellite in satellites)
+            {
+                if (satellite == this) // || satellite.interSatelliteLinkProtocol.Links.Any(l => l.Satellite1 == this || l.Satellite2 == this))
+                {
+                    continue;
+                }
+
+                var link = new IslLink(this, satellite);
+                this.InterSatelliteLinkProtocol.Links.Add(link);
+                satellite.InterSatelliteLinkProtocol.Links.Add(link);
+            }
+        }, satellites);
+    }
 }

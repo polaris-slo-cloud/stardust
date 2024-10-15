@@ -1,45 +1,49 @@
-﻿using System;
+﻿using StardustLibrary.Node.Networking;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace StardustLibrary.Node;
 
-public class GroundStation : EarthCenteredObject
+public class GroundStation : Node
 {
 
     public string Name { get; }
     private double Latitude { get; }
     private double Longitude { get; }
     public DateTime SimulationStartTime { get; }
+    public IGroundSatelliteLinkProtocol GroundSatelliteLinkProtocol { get; }
 
-    public GroundStation(string name, double longitude, double latitude, DateTime simulationStartTime)
+    public GroundStation(string name, double longitude, double latitude, IGroundSatelliteLinkProtocol groundSatelliteLinkProtocol, DateTime simulationStartTime)
     {
         Name = name;
         Latitude = latitude;
         Longitude = longitude;
         SimulationStartTime = simulationStartTime;
+        GroundSatelliteLinkProtocol = groundSatelliteLinkProtocol;
 
         // Set initial position
         UpdatePosition(0);
+        groundSatelliteLinkProtocol.Mount(this);
     }
 
-    public GroundStation(string name, double longitude, double latitude)
-        : this(name, latitude, longitude, DateTime.Now)
+    public GroundStation(string name, double longitude, double latitude, IGroundSatelliteLinkProtocol groundSatelliteLinkProtocol)
+        : this(name, latitude, longitude, groundSatelliteLinkProtocol, DateTime.UtcNow)
     {
     }
 
-    public override Task UpdatePosition(DateTime simulationTime)
+    public override async Task UpdatePosition(DateTime simulationTime)
     {
         double elapsedSeconds = (simulationTime - SimulationStartTime).TotalSeconds;
         UpdatePosition(elapsedSeconds);
-        return Task.CompletedTask;
+        await GroundSatelliteLinkProtocol.UpdateLink();
     }
 
     // Convert ground station's latitude and longitude to 3D Earth-centered coordinates
     public void UpdatePosition(double timeElapsed)
     {
         // Longitude changes due to Earth's rotation
-        double longitudeRad = Longitude.DegToRad(); // + (timeElapsed * Physics.EARTH_ROTATION_SPEED);
+        double longitudeRad = Longitude.DegToRad() + (timeElapsed * Physics.EARTH_ROTATION_SPEED);
         double latitudeRad = Latitude.DegToRad();
 
         double x = Physics.EARTH_RADIUS * Math.Cos(latitudeRad) * Math.Cos(longitudeRad);

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,13 +7,9 @@ namespace StardustLibrary.DataSource.Satellite;
 
 public class SatelliteConstellationLoaderService : BackgroundService
 {
-    // force DI to load TleSatelliteConstellationLoader (and potentially other loaders)
-    public SatelliteConstellationLoaderService(TleSatelliteConstellationLoader tleSatelliteConstellationLoader)
+    public SatelliteConstellationLoaderService(System.IServiceProvider serviceProvider)
     {
-    }
-
-    public SatelliteConstellationLoaderService()
-    {
+        _ = serviceProvider.GetService<TleSatelliteConstellationLoader>();
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)

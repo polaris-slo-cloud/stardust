@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace StardustLibrary.Node;
 
-public abstract class EarthCenteredObject
+public abstract class Node
 {
     public Computing.Computing Computing { get; }
     public (double X, double Y, double Z) Position { get; protected set; }
@@ -21,7 +21,7 @@ public abstract class EarthCenteredObject
     /// </summary>
     /// <param name="other">The other Earth Centered Object</param>
     /// <returns>The distance to the other object.</returns>
-    public double DistanceTo(EarthCenteredObject other)
+    public double DistanceTo(Node other)
     {
         var (x1, y1, z1) = Position;
         var (x2, y2, z2) = other.Position;

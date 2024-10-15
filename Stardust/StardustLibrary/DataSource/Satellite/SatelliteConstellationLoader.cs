@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
+using StardustLibrary.Node;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -10,22 +13,16 @@ namespace StardustLibrary.DataSource.Satellite;
 public class SatelliteConstellationLoader
 {
     private readonly Dictionary<string, ISatelliteConstellationLoader> constellationLoaders = [];
-    private readonly Dictionary<string, List<Node.Satellite>> loadedConstellations = [];
-    private readonly ILogger<SatelliteConstellationLoader>? logger;
+    private readonly ILogger<SatelliteConstellationLoader> logger;
 
-    public SatelliteConstellationLoader(ILogger<SatelliteConstellationLoader>? logger = default)
+    public SatelliteConstellationLoader(ILogger<SatelliteConstellationLoader> logger)
     {
         this.logger = logger;
     }
 
     public async Task<List<Node.Satellite>> LoadSatelliteConstellation(string dataSource, string? sourceType)
     {
-        logger?.LogInformation("Trying to load satellite constellation data using source {0} with file type {1}", dataSource, sourceType);
-
-        if (loadedConstellations.TryGetValue(dataSource, out var satellites))
-        {
-            return satellites;
-        }
+        logger.LogInformation("Trying to load satellite constellation data using source {0} with file type {1}", dataSource, sourceType);
 
         Stream? sourceStream = null;
         if (File.Exists(dataSource))
@@ -47,9 +44,20 @@ public class SatelliteConstellationLoader
         sourceType ??= TryGuessSourceType(dataSource);
 
         var loader = constellationLoaders[sourceType];
-        return loader == null
-            ? throw new ArgumentException("Unsupported data source file type", nameof(dataSource))
-            : (loadedConstellations[dataSource] = await loader.Load(sourceStream).ConfigureAwait(false));
+        if (loader == null)
+        {
+            throw new ArgumentException("Unsupported data source file type", nameof(dataSource));
+        }
+
+        var satellites = await loader.Load(sourceStream).ConfigureAwait(false);
+        Parallel.ForEach(satellites, async (s) => await s.ConfigureConstellation(satellites.SkipWhile(i => i != s).ToList()).ConfigureAwait(false));
+        //foreach (var satellite in satellites)
+        //{
+        //    await satellite.ConfigureConstellation(satellites.SkipWhile(s => s != satellite).ToList()); // use skipwhile, that in method ConfigureConstellation there is no .Any(...) search which would make time O(n^2) (now O(n)) and take up to 5min startup time
+        //}
+
+        logger.LogInformation("{0} satellites loaded", satellites.Count);
+        return satellites;
     }
 
     public void RegisterDataSourceLoader(string sourceType, ISatelliteConstellationLoader loader)

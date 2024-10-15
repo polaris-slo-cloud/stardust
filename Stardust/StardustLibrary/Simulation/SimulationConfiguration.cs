@@ -2,10 +2,12 @@
 
 public class SimulationConfiguration
 {
+    public double? StepMultiplier { get; set; }
+
     /// <summary>
     /// StepLength in seconds
     /// </summary>
-    public double StepLength { get; set; }
+    public double? StepLength { get; set; }
 
     /// <summary>
     /// Gets or sets the interval at which the simulation advances by one StepLength.
