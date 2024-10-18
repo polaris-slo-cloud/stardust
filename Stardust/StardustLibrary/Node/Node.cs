@@ -1,4 +1,7 @@
-﻿using System;
+﻿using StardustLibrary.Node.Networking;
+using StardustLibrary.Node.Networking.Routing;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace StardustLibrary.Node;
@@ -6,7 +9,17 @@ namespace StardustLibrary.Node;
 public abstract class Node
 {
     public Computing.Computing Computing { get; }
+    public IRouter Router { get; set; }
     public (double X, double Y, double Z) Position { get; protected set; }
+
+    public abstract List<ILink> Links { get; }
+    public abstract List<ILink> Established { get; }
+
+    protected Node(IRouter router)
+    {
+        Router = router;
+        Router.Mount(this);
+    }
 
     /// <summary>
     /// Calculates the position for a given DateTime.

@@ -1,6 +1,8 @@
 ﻿using StardustLibrary.Node.Networking;
+using StardustLibrary.Node.Networking.Routing;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace StardustLibrary.Node;
@@ -20,10 +22,12 @@ public class Satellite : Node
     public double SemiMajorAxis { get; private set; }  // meters
     private DateTime Epoch { get; set; }  // TLE epoch
     public IInterSatelliteLinkProtocol InterSatelliteLinkProtocol { get; }
-    public Router Router { get; }
     public List<GroundLink> GroundLinks { get; } = [];
 
-    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, DateTime simulationTime, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, Router router)
+    public override List<ILink> Links { get => InterSatelliteLinkProtocol.Links.Cast<ILink>().ToList(); }
+    public override List<ILink> Established { get => InterSatelliteLinkProtocol.Established.Cast<ILink>().ToList(); }
+
+    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, DateTime simulationTime, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, IRouter router) : base(router)
     {
         Name = name;
         Inclination = inclination;
@@ -37,13 +41,11 @@ public class Satellite : Node
         MeanMotion = meanMotion;
         Epoch = epoch;
         InterSatelliteLinkProtocol = interSatelliteLinkProtocol;
-        Router = router;
         InterSatelliteLinkProtocol.Mount(this);
-        Router.Mount(this);
         UpdatePosition(simulationTime).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
-    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, Router router)
+    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, IRouter router)
         : this(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, DateTime.UtcNow, interSatelliteLinkProtocol, router)
     {
     }
@@ -151,9 +153,13 @@ public class Satellite : Node
                 }
 
                 var link = new IslLink(this, satellite);
-                this.InterSatelliteLinkProtocol.Links.Add(link);
-                satellite.InterSatelliteLinkProtocol.Links.Add(link);
+                this.InterSatelliteLinkProtocol.AddLink(link);
+                if (this.InterSatelliteLinkProtocol != satellite.InterSatelliteLinkProtocol)
+                {
+                    satellite.InterSatelliteLinkProtocol.AddLink(link);
+                }
             }
         }, satellites);
     }
+
 }

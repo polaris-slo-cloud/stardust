@@ -1,4 +1,6 @@
-﻿namespace StardustLibrary.Node.Networking;
+﻿using System;
+
+namespace StardustLibrary.Node.Networking;
 
 public class GroundLink : ILink
 {
@@ -11,9 +13,27 @@ public class GroundLink : ILink
 
     public double Bandwidth { get; } = 500_000_000; // 500Mbit static for now
 
+    public bool Established => true;
+
     public GroundLink(GroundStation groundStation, Satellite satellite)
     {
         GroundStation = groundStation;
         Satellite = satellite;
+    }
+
+    public Node GetOther(Node self)
+    {
+        if (self == Satellite)
+        {
+            return GroundStation;
+        }
+
+
+        if (self == GroundStation)
+        {
+            return Satellite;
+        }
+
+        throw new ApplicationException("This ground station is not referenced with this link");
     }
 }

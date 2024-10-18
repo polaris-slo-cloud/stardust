@@ -12,16 +12,16 @@ HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 // TODO load config from config file
 builder.Services.AddSingleton(new SimulationConfiguration
 {
-    //StepInterval = 1,
-    //StepLength = 10,
-    StepMultiplier = 10,
+    StepInterval = 15,
+    StepLength = 300,
+    //StepMultiplier = 10,
     SatelliteDataSource = "starlink.tle",
     SatelliteDataSourceType = "tle",
 });
 builder.Services.AddSingleton(new InterSatelliteLinkConfig
 {
     Neighbours = 4,
-    Protocol = "nearest"
+    Protocol = "other_mst"
 });
 
 builder.Services.AddSingleton<SimulationService>();

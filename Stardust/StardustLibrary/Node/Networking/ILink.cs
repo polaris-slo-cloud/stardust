@@ -18,4 +18,8 @@ public interface ILink
     /// Bandwidth in bits per second
     /// </summary>
     public double Bandwidth { get; }
+
+    public bool Established { get; }
+
+    public Node GetOther(Node self);
 }

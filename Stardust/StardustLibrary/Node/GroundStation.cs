@@ -1,4 +1,5 @@
 ﻿using StardustLibrary.Node.Networking;
+using StardustLibrary.Node.Networking.Routing;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,7 +15,10 @@ public class GroundStation : Node
     public DateTime SimulationStartTime { get; }
     public IGroundSatelliteLinkProtocol GroundSatelliteLinkProtocol { get; }
 
-    public GroundStation(string name, double longitude, double latitude, IGroundSatelliteLinkProtocol groundSatelliteLinkProtocol, DateTime simulationStartTime)
+    public override List<ILink> Links => [GroundSatelliteLinkProtocol.Link];
+    public override List<ILink> Established => [GroundSatelliteLinkProtocol.Link];
+
+    public GroundStation(string name, double longitude, double latitude, IGroundSatelliteLinkProtocol groundSatelliteLinkProtocol, DateTime simulationStartTime, IRouter router) : base(router)
     {
         Name = name;
         Latitude = latitude;
@@ -27,8 +31,8 @@ public class GroundStation : Node
         groundSatelliteLinkProtocol.Mount(this);
     }
 
-    public GroundStation(string name, double longitude, double latitude, IGroundSatelliteLinkProtocol groundSatelliteLinkProtocol)
-        : this(name, latitude, longitude, groundSatelliteLinkProtocol, DateTime.UtcNow)
+    public GroundStation(string name, double longitude, double latitude, IGroundSatelliteLinkProtocol groundSatelliteLinkProtocol, IRouter router)
+        : this(name, latitude, longitude, groundSatelliteLinkProtocol, DateTime.UtcNow, router)
     {
     }
 

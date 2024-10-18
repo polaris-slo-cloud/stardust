@@ -1,4 +1,6 @@
-﻿namespace StardustLibrary.Node.Networking;
+﻿using System;
+
+namespace StardustLibrary.Node.Networking;
 
 public class IslLink : ILink
 {
@@ -28,5 +30,35 @@ public class IslLink : ILink
     {
         Satellite1 = satellite1;
         Satellite2 = satellite2;
+    }
+    
+    public Satellite GetOther(Satellite self)
+    {
+        if (self == Satellite1)
+        {
+            return Satellite2;
+        }
+
+        if (self == Satellite2)
+        {
+            return Satellite1;
+        }
+
+        throw new ApplicationException("This satellite is not referenced with this link");
+    }
+
+    public Node GetOther(Node self)
+    {
+        if (self == Satellite1)
+        {
+            return Satellite2;
+        }
+
+        if (self == Satellite2)
+        {
+            return Satellite1;
+        }
+
+        throw new ApplicationException("This node is not referenced with this link");
     }
 }

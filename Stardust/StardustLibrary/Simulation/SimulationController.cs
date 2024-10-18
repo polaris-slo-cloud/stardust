@@ -3,6 +3,7 @@ using StardustLibrary.DataSource.Satellite;
 using StardustLibrary.Node;
 using StardustLibrary.Node.Computing;
 using StardustLibrary.Node.Networking;
+using StardustLibrary.Node.Networking.Routing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -120,11 +121,11 @@ public class SimulationController : ISimulationController
             {
                 groundStations =
                     [
-                        new GroundStation("Vienna", 16.3738, 48.2082, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false))),
-                        new GroundStation("Reykjavik", -21.8277, 64.1283, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false))),
-                        new GroundStation("New York", -74.0060, 40.7128, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false))),
-                        new GroundStation("Sydney", 151.2093, -33.8688, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false))),
-                        new GroundStation("Buenos Aires", -58.3816, -34.6037, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false))),
+                        new GroundStation("Vienna", 16.3738, 48.2082, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
+                        new GroundStation("Reykjavik", -21.8277, 64.1283, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
+                        new GroundStation("New York", -74.0060, 40.7128, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
+                        new GroundStation("Sydney", 151.2093, -33.8688, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
+                        new GroundStation("Buenos Aires", -58.3816, -34.6037, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
                     ];
                 all.AddRange(groundStations);
             }

@@ -12,8 +12,10 @@ public class IslNearestProtocol : IInterSatelliteLinkProtocol
     private readonly InterSatelliteLinkConfig config;
     private Satellite? satellite;
 
-    public BlockingCollection<IslLink> Links { get; set; } = [];
-    public List<IslLink> Established { get => outgoing.Concat(incoming).Distinct().ToList(); }
+    private List<IslLink> links = [];
+    public ICollection<IslLink> Links { get => links; }
+
+    public ICollection<IslLink> Established { get => outgoing.Concat(incoming).Distinct().ToList(); }
 
     private List<IslLink> outgoing = [];
     private readonly List<IslLink> incoming = [];
@@ -71,7 +73,7 @@ public class IslNearestProtocol : IInterSatelliteLinkProtocol
             var prevOut = outgoing;
             outgoing = Links.OrderBy(l => l.Distance)
                 .TakeWhile(l => l.Distance <= Physics.MAX_ISL_DISTANCE)
-                .Take(config.Neighbours / 2)
+                //.Take(config.Neighbours / 2)
                 .ToList();
 
             foreach (var link in outgoing)
@@ -95,5 +97,10 @@ public class IslNearestProtocol : IInterSatelliteLinkProtocol
 
             return outgoing;
         });
+    }
+
+    public void AddLink(IslLink link)
+    {
+        links.Add(link);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using StardustLibrary.Node.Networking;
+using StardustLibrary.Node.Networking.Routing;
 using System;
 
 namespace StardustLibrary.Node;
@@ -13,7 +14,7 @@ internal class SatelliteBuilder
     private double meanAnomaly;
     private double meanMotion;
     private DateTime epoch;
-    private IslProtocolBuilder islProtocolBuilder;
+    private IslProtocolBuilder? islProtocolBuilder;
 
     public SatelliteBuilder SetName(string name)
     {
@@ -64,13 +65,13 @@ internal class SatelliteBuilder
 
     public SatelliteBuilder ConfigureIsl(Func<IslProtocolBuilder, IslProtocolBuilder> func)
     {
-        this.islProtocolBuilder = new IslProtocolBuilder();
+        this.islProtocolBuilder = IslProtocolBuilder.Builder;
         this.islProtocolBuilder = func(islProtocolBuilder);
         return this;
     }
 
     public Satellite Build()
     {
-        return new Satellite(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, islProtocolBuilder.Build(), new Router());
+        return new Satellite(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, islProtocolBuilder.Build(), new DijkstraRouter());
     }
 }
