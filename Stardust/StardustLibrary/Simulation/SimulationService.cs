@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Stardust.Abstraction.Exceptions;
 using Stardust.Abstraction.Node;
 using Stardust.Abstraction.Simulation;
 using System;

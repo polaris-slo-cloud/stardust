@@ -1,4 +1,4 @@
-﻿using StardustLibrary.Links.SatelliteLink;
+﻿using StardustLibrary.Links;
 using StardustLibrary.Routing;
 using System;
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Stardust.Abstraction.DataSource;
-using StardustLibrary.Links.SatelliteLink;
+using Stardust.Abstraction.Links;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

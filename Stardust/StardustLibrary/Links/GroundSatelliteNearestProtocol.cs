@@ -5,16 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace StardustLibrary.Links.Ground;
+namespace StardustLibrary.Links;
 
-public class GroundLinkNearestProtocol : IGroundSatelliteLinkProtocol
+public class GroundSatelliteNearestProtocol : IGroundSatelliteLinkProtocol
 {
     public GroundLink? Link { get; private set; }
 
-    private readonly List<Stardust.Abstraction.Node.Satellite> satellites;
+    private readonly List<Satellite> satellites;
     private GroundStation? groundStation;
 
-    public GroundLinkNearestProtocol(List<Satellite> satellites)
+    public GroundSatelliteNearestProtocol(List<Satellite> satellites)
     {
         this.satellites = satellites;
     }

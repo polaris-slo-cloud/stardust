@@ -12,7 +12,7 @@ public class IslSatelliteFilterWrapperProtocol : IInterSatelliteLinkProtocol
     private readonly IInterSatelliteLinkProtocol protocol;
     private Satellite? satellite;
 
-    private List<IslLink> links = [];
+    private readonly List<IslLink> links = [];
     public ICollection<IslLink> Links => links;
 
     private List<IslLink> established = [];
@@ -27,7 +27,10 @@ public class IslSatelliteFilterWrapperProtocol : IInterSatelliteLinkProtocol
     {
         if (link.Satellite1 == satellite || link.Satellite2 == satellite)
         {
-            links.Add(link);
+            lock (links)
+            {
+                links.Add(link);
+            }
         }
         protocol.AddLink(link);
     }

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <Folder Include="DataSource\GroundStation\" />
+    <Folder Include="Links\Ground\" />
   </ItemGroup>
 
   <ItemGroup>

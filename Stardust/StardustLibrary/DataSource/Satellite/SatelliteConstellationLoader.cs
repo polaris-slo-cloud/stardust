@@ -49,7 +49,7 @@ public class SatelliteConstellationLoader
         }
 
         var satellites = await loader.Load(sourceStream).ConfigureAwait(false);
-        Parallel.ForEach(satellites, async (s) => await s.ConfigureConstellation(satellites.SkipWhile(i => i != s).ToList()).ConfigureAwait(false));
+        Parallel.ForEach(satellites, async (s) => await s.ConfigureConstellation(satellites.SkipWhile(i => i != s).Skip(1).ToList()).ConfigureAwait(false));
         //foreach (var satellite in satellites)
         //{
         //    await satellite.ConfigureConstellation(satellites.SkipWhile(s => s != satellite).ToList()); // use skipwhile, that in method ConfigureConstellation there is no .Any(...) search which would make time O(n^2) (now O(n)) and take up to 5min startup time

@@ -3,7 +3,7 @@ using Stardust.Abstraction.Computing;
 using Stardust.Abstraction.Node;
 using Stardust.Abstraction.Simulation;
 using StardustLibrary.DataSource.Satellite;
-using StardustLibrary.Links.Ground;
+using StardustLibrary.Links;
 using StardustLibrary.Routing;
 using System.Collections.Generic;
 using System.Linq;
@@ -130,11 +130,11 @@ public class SimulationController : ISimulationController
             {
                 groundStations =
                     [
-                        new GroundStation("Vienna", 16.3738, 48.2082, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
-                        new GroundStation("Reykjavik", -21.8277, 64.1283, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
-                        new GroundStation("New York", -74.0060, 40.7128, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
-                        new GroundStation("Sydney", 151.2093, -33.8688, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
-                        new GroundStation("Buenos Aires", -58.3816, -34.6037, new GroundLinkNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
+                        new GroundStation("Vienna", 16.3738, 48.2082, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
+                        new GroundStation("Reykjavik", -21.8277, 64.1283, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
+                        new GroundStation("New York", -74.0060, 40.7128, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
+                        new GroundStation("Sydney", 151.2093, -33.8688, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
+                        new GroundStation("Buenos Aires", -58.3816, -34.6037, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
                     ];
                 all.AddRange(groundStations);
             }
@@ -142,7 +142,7 @@ public class SimulationController : ISimulationController
         }
         return all.Cast<T>();
     }
-    private Task<IEnumerable<T>> GetAllNodesInternalAsync<T>(ComputingType computingType, IEnumerable<T> list) where T : Node
+    private static Task<IEnumerable<T>> GetAllNodesInternalAsync<T>(ComputingType computingType, IEnumerable<T> list) where T : Node
     {
         return Task.FromResult(list.Where(n => n.Computing.Type == computingType));
     }

@@ -1,7 +1,8 @@
 ﻿using Stardust.Abstraction.Links;
+using StardustLibrary.Links.SatelliteLink;
 using System;
 
-namespace StardustLibrary.Links.SatelliteLink;
+namespace StardustLibrary.Links;
 
 public class IslProtocolBuilder
 {

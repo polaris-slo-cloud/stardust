@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
+using Stardust.Abstraction.Links;
 using StardustLibrary.DataSource.Satellite;
-using StardustLibrary.Links.SatelliteLink;
 
 namespace Stardust.Tests
 {

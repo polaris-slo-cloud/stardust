@@ -1,4 +1,4 @@
-﻿namespace StardustLibrary.Links.SatelliteLink;
+﻿namespace Stardust.Abstraction.Links;
 
 public class InterSatelliteLinkConfig
 {
