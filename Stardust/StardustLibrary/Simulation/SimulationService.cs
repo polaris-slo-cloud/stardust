@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using StardustLibrary.Exceptions;
-using StardustLibrary.Node;
+using Stardust.Abstraction.Node;
+using Stardust.Abstraction.Simulation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -138,6 +138,10 @@ public class SimulationService : BackgroundService
                     else
                     {
                         await Task.Delay((int)(sw.ElapsedMilliseconds / 3)).ConfigureAwait(false);
+                    }
+                    if (simulationConfiguration.StepInterval < 0)
+                    {
+                        await simulationController.StepEndAsync();
                     }
                     logger.LogInformation("Round took {0}ms; delta: {1}ms", sw.ElapsedMilliseconds, delta);
                     sw.Restart();

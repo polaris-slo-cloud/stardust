@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using StardustLibrary.Node;
-using StardustLibrary.Node.Networking;
+using Stardust.Abstraction.DataSource;
+using StardustLibrary.Links.SatelliteLink;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -28,11 +28,11 @@ public class TleSatelliteConstellationLoader : ISatelliteConstellationLoader
         this.logger = logger;
     }
 
-    public async Task<List<Node.Satellite>> Load(Stream stream)
+    public async Task<List<Stardust.Abstraction.Node.Satellite>> Load(Stream stream)
     {
         logger?.LogTrace("Try to parse stream as tle data.");
 
-        var satellites = new List<Node.Satellite>();
+        var satellites = new List<Stardust.Abstraction.Node.Satellite>();
         using var reader = new StreamReader(stream, leaveOpen: false);
 
         string? line1, line2;

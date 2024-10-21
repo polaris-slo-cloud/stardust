@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using StardustLibrary.Node;
+using Stardust.Abstraction.DataSource;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -20,7 +19,7 @@ public class SatelliteConstellationLoader
         this.logger = logger;
     }
 
-    public async Task<List<Node.Satellite>> LoadSatelliteConstellation(string dataSource, string? sourceType)
+    public async Task<List<Stardust.Abstraction.Node.Satellite>> LoadSatelliteConstellation(string dataSource, string? sourceType)
     {
         logger.LogInformation("Trying to load satellite constellation data using source {0} with file type {1}", dataSource, sourceType);
 

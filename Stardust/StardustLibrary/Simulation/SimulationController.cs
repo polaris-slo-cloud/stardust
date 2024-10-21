@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
+using Stardust.Abstraction.Computing;
+using Stardust.Abstraction.Node;
+using Stardust.Abstraction.Simulation;
 using StardustLibrary.DataSource.Satellite;
-using StardustLibrary.Node;
-using StardustLibrary.Node.Computing;
-using StardustLibrary.Node.Networking;
-using StardustLibrary.Node.Networking.Routing;
+using StardustLibrary.Links.Ground;
+using StardustLibrary.Routing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -21,10 +22,11 @@ public class SimulationController : ISimulationController
     private List<Satellite>? satellites = null;
     private List<GroundStation>? groundStations = null;
 
-    private readonly List<Node.Node> all = [];
+    private readonly List<Node> all = [];
 
     private bool autorun;
     private readonly SemaphoreSlim stepEvent = new(0);
+    private readonly SemaphoreSlim stepCompleteEvent = new(0);
 
     public SimulationController(SatelliteConstellationLoader constellationLoader, SimulationConfiguration configuration, ILogger<SimulationController> logger)
     {
@@ -48,14 +50,21 @@ public class SimulationController : ISimulationController
         return Task.FromResult(true);
     }
 
-    public Task<bool> StepAsync()
+    public async Task<bool> StepAsync()
     {
         if (autorun)
         {
-            return Task.FromResult(false);
+            return false;
         }
         stepEvent.Release();
-        return Task.FromResult(true);
+        await stepCompleteEvent.WaitAsync();
+        return true;
+    }
+
+    public Task StepEndAsync()
+    {
+        stepCompleteEvent.Release();
+        return Task.CompletedTask;
     }
 
     public Task<bool> StopAutorunAsync()
@@ -80,31 +89,31 @@ public class SimulationController : ISimulationController
     #endregion
 
     #region API
-    public Task<List<Node.Node>> GetAllNodesAsync()
+    public Task<List<Node>> GetAllNodesAsync()
     {
         return Task.FromResult(all.ToList());
     }
 
-    public async Task<List<Node.Node>> GetAllNodesAsync(ComputingType computingType)
+    public async Task<List<Node>> GetAllNodesAsync(ComputingType computingType)
     {
         var list = await GetAllNodesInternalAsync(computingType, all).ConfigureAwait(false);
         return list.ToList();
     }
 
-    public async Task<List<T>> GetAllNodesAsync<T>() where T : Node.Node
+    public async Task<List<T>> GetAllNodesAsync<T>() where T : Node
     {
         var list = await GetAllNodesInternalAsync<T>().ConfigureAwait(false);
         return list.ToList();
     }
 
-    public async Task<List<T>> GetAllNodesAsync<T>(ComputingType computingType) where T : Node.Node
+    public async Task<List<T>> GetAllNodesAsync<T>(ComputingType computingType) where T : Node
     {
         var list = await GetAllNodesInternalAsync<T>().ConfigureAwait(false);
         list = await GetAllNodesInternalAsync(computingType, list).ConfigureAwait(false);
         return list.ToList();
     }
 
-    private async Task<IEnumerable<T>> GetAllNodesInternalAsync<T>() where T : Node.Node
+    private async Task<IEnumerable<T>> GetAllNodesInternalAsync<T>() where T : Node
     {
         if (typeof(Satellite).IsAssignableFrom(typeof(T)))
         {
@@ -133,7 +142,7 @@ public class SimulationController : ISimulationController
         }
         return all.Cast<T>();
     }
-    private Task<IEnumerable<T>> GetAllNodesInternalAsync<T>(ComputingType computingType, IEnumerable<T> list) where T : Node.Node
+    private Task<IEnumerable<T>> GetAllNodesInternalAsync<T>(ComputingType computingType, IEnumerable<T> list) where T : Node
     {
         return Task.FromResult(list.Where(n => n.Computing.Type == computingType));
     }

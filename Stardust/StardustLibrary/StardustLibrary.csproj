@@ -13,4 +13,8 @@
     <Folder Include="DataSource\GroundStation\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Stardust.Abstraction\Stardust.Abstraction.csproj" />
+  </ItemGroup>
+
 </Project>
