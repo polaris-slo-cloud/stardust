@@ -40,7 +40,13 @@ public class IslMstProtocol : IInterSatelliteLinkProtocol
 
     public Task Connect(IslLink link)
     {
-        established.Add(link);
+        lock (established)
+        {
+            if (!established.Contains(link))
+            {
+                established.Add(link);
+            }
+        }
         return Task.CompletedTask;
     }
 
@@ -70,7 +76,10 @@ public class IslMstProtocol : IInterSatelliteLinkProtocol
         if (calculatedPosition == satellite.Position)
         {
             resetEvent.WaitOne();
-            return Task.FromResult(this.established);
+            lock (this.established)
+            {
+                return Task.FromResult(this.established);
+            }
         }
         lock (this)
         {

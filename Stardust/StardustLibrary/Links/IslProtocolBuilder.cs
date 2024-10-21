@@ -1,4 +1,5 @@
-﻿using Stardust.Abstraction.Links;
+﻿using Stardust.Abstraction.Exceptions;
+using Stardust.Abstraction.Links;
 using StardustLibrary.Links.SatelliteLink;
 using System;
 
@@ -8,13 +9,40 @@ public class IslProtocolBuilder
 {
     private const string NEAREST = "nearest";
     private const string MST = "mst";
+    private const string MST_LOOP = "mst_loop";
     private const string OTHER_MST = "other_mst";
+    private const string OTHER_MST_LOOP = "other_mst_loop";
 
-    public static IslProtocolBuilder Builder { get; private set; } = new IslProtocolBuilder();
+    public static IslProtocolBuilder Builder { get; } = new IslProtocolBuilder();
+
+
+    private IslMstProtocol? mstProtocol;
+    private IslMstProtocol MstProtocol
+    {
+        get
+        {
+            lock (this)
+            {
+                mstProtocol ??= new IslMstProtocol();
+            }
+            return mstProtocol;
+        }
+    }
+
+    private IslOtherMstProtocol? otherMstProtocol;
+    private IslOtherMstProtocol OtherMstProtocol
+    {
+        get
+        {
+            lock (this)
+            {
+                otherMstProtocol ??= new IslOtherMstProtocol();
+            }
+            return otherMstProtocol;
+        }
+    }
 
     private InterSatelliteLinkConfig? config;
-    private IslMstProtocol? mstProtocol;
-    private IslOtherMstProtocol? otherMstProtocol;
 
     private IslProtocolBuilder()
     {
@@ -22,40 +50,23 @@ public class IslProtocolBuilder
 
     public IslProtocolBuilder SetConfig(InterSatelliteLinkConfig config)
     {
-        if (config is null)
-        {
-            throw new ArgumentNullException(nameof(config));
-        }
-
         this.config = config;
         return this;
     }
 
     public IInterSatelliteLinkProtocol Build()
     {
-        switch (config.Protocol)
+        ArgumentNullException.ThrowIfNull(config);
+
+        return config.Protocol switch
         {
-            case MST:
-                if (mstProtocol == null)
-                {
-                    lock (this)
-                    {
-                        mstProtocol ??= new IslMstProtocol();
-                    }
-                }
-                return new IslSatelliteFilterWrapperProtocol(mstProtocol);
-            case OTHER_MST:
-                if (otherMstProtocol == null)
-                {
-                    lock (this)
-                    {
-                        otherMstProtocol ??= new IslOtherMstProtocol();
-                    }
-                }
-                return new IslSatelliteFilterWrapperProtocol(otherMstProtocol);
-            case NEAREST:
-            default:
-                return new IslNearestProtocol(config);
-        }
+            MST => new IslFilterProtocol(MstProtocol),
+            MST_LOOP => new IslAddLoopProtocol(new IslFilterProtocol(MstProtocol), config),
+            OTHER_MST => new IslFilterProtocol(OtherMstProtocol),
+            OTHER_MST_LOOP => new IslAddLoopProtocol(new IslFilterProtocol(OtherMstProtocol), config),
+            NEAREST => new IslNearestProtocol(config),
+
+            _ => throw new ConfigurationException("Unknown ISL protocol.")
+        };
     }
 }

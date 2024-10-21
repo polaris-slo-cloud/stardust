@@ -1,26 +1,30 @@
 ﻿using Stardust.Abstraction.Exceptions;
 using Stardust.Abstraction.Links;
 using Stardust.Abstraction.Node;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace StardustLibrary.Links.SatelliteLink;
+namespace StardustLibrary.Links;
 
-public class IslSatelliteFilterWrapperProtocol : IInterSatelliteLinkProtocol
+public class IslFilterProtocol(IInterSatelliteLinkProtocol protocol) : IInterSatelliteLinkProtocol
 {
-    private readonly IInterSatelliteLinkProtocol protocol;
     private Satellite? satellite;
 
     private readonly List<IslLink> links = [];
     public ICollection<IslLink> Links => links;
 
     private List<IslLink> established = [];
-    public ICollection<IslLink> Established => established;
-
-    public IslSatelliteFilterWrapperProtocol(IInterSatelliteLinkProtocol protocol)
+    public ICollection<IslLink> Established
     {
-        this.protocol = protocol;
+        get
+        {
+            lock (established)
+            {
+                return established.ToList();
+            }
+        }
     }
 
     public void AddLink(IslLink link)
@@ -29,7 +33,10 @@ public class IslSatelliteFilterWrapperProtocol : IInterSatelliteLinkProtocol
         {
             lock (links)
             {
-                links.Add(link);
+                if (!links.Contains(link))
+                {
+                    links.Add(link);
+                }
             }
         }
         protocol.AddLink(link);
@@ -37,6 +44,11 @@ public class IslSatelliteFilterWrapperProtocol : IInterSatelliteLinkProtocol
 
     public async Task Connect(Satellite satellite)
     {
+        if (satellite == this.satellite)
+        {
+            throw new ArgumentException("The satellite must not be the mounted satellite.");
+        }
+
         var link = links.Find(l => l.Satellite1 == satellite || l.Satellite2 == satellite);
         if (link != null)
         {
@@ -46,12 +58,27 @@ public class IslSatelliteFilterWrapperProtocol : IInterSatelliteLinkProtocol
 
     public async Task Connect(IslLink link)
     {
-        established.Add(link);
+        if (link.Satellite1 == satellite || link.Satellite2 == satellite)
+        {
+            lock (established)
+            {
+                if (!established.Contains(link))
+                {
+                    established.Add(link);
+                    link.Established = true;
+                }
+            }
+        }
         await protocol.Connect(link);
     }
 
     public async Task Disconnect(Satellite satellite)
     {
+        if (satellite == this.satellite)
+        {
+            throw new ArgumentException("The satellite must not be the mounted satellite.");
+        }
+
         var link = links.Find(l => l.Satellite1 == satellite || l.Satellite2 == satellite);
         if (link != null)
         {
@@ -61,7 +88,11 @@ public class IslSatelliteFilterWrapperProtocol : IInterSatelliteLinkProtocol
 
     public async Task Disconnect(IslLink link)
     {
-        established.Remove(link);
+        lock (established)
+        {
+            established.Remove(link);
+            link.Established = false;
+        }
         await protocol.Disconnect(link);
     }
 
@@ -83,31 +114,7 @@ public class IslSatelliteFilterWrapperProtocol : IInterSatelliteLinkProtocol
             throw new MountException("This protocol is not mounted to a satellite");
         }
 
-        List<IslLink> list = await protocol.UpdateLinks();
-        var established = list.Where(l => l != null).Where(l => l.Satellite1 == satellite || l.Satellite2 == satellite).ToList();
-        //if (established.Count > 0 && established.Count <= 2)
-        //{
-        //    var consider = links.Select(l => (l.Distance, l)).Where(l => l.Distance <= Physics.MAX_ISL_DISTANCE && l.l.GetOther(satellite).Established.Count <= 3 && !established.Contains(l.l)).OrderBy(l => l.Distance).FirstOrDefault();
-        //    if (consider != default)
-        //    {
-        //        var link = consider.l;
-        //        var other = link.GetOther(satellite);
-
-        //        link.Established = true;
-        //        await other.InterSatelliteLinkProtocol.Connect(link);
-        //        await protocol.Connect(link);
-        //    }
-        //}
-
-        //foreach (var link in this.established)
-        //{
-        //    if (!established.Contains(link))
-        //    {
-        //        link.Established = false;
-        //    }
-        //}
-
-        this.established = established;
-        return this.established;
+        var list = await protocol.UpdateLinks();
+        return this.established = list.Where(l => l != null).Where(l => l.Satellite1 == satellite || l.Satellite2 == satellite).ToList();
     }
 }
