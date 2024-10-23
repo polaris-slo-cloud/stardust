@@ -16,6 +16,7 @@ public class SimulationController : ISimulationController
 {
     private readonly SatelliteConstellationLoader constellationLoader;
     private readonly SimulationConfiguration configuration;
+    private readonly RouterBuilder routerBuilder;
     private readonly ILogger<SimulationController> logger;
 
 
@@ -25,13 +26,15 @@ public class SimulationController : ISimulationController
     private readonly List<Node> all = [];
 
     private bool autorun;
+    private readonly AutoResetEvent resetEvent = new(false);
     private readonly SemaphoreSlim stepEvent = new(0);
     private readonly SemaphoreSlim stepCompleteEvent = new(0);
 
-    public SimulationController(SatelliteConstellationLoader constellationLoader, SimulationConfiguration configuration, ILogger<SimulationController> logger)
+    public SimulationController(SatelliteConstellationLoader constellationLoader, SimulationConfiguration configuration, RouterBuilder routerBuilder, ILogger<SimulationController> logger)
     {
         this.constellationLoader = constellationLoader;
         this.configuration = configuration;
+        this.routerBuilder = routerBuilder;
         this.logger = logger;
 
         this.autorun = configuration.StepInterval >= 0;
@@ -84,7 +87,7 @@ public class SimulationController : ISimulationController
         {
             return;
         }
-        await stepEvent.WaitAsync();
+        await stepEvent.WaitAsync(cancellationToken).ConfigureAwait(false);
     }
     #endregion
 
@@ -130,11 +133,11 @@ public class SimulationController : ISimulationController
             {
                 groundStations =
                     [
-                        new GroundStation("Vienna", 16.3738, 48.2082, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
-                        new GroundStation("Reykjavik", -21.8277, 64.1283, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
-                        new GroundStation("New York", -74.0060, 40.7128, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
-                        new GroundStation("Sydney", 151.2093, -33.8688, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
-                        new GroundStation("Buenos Aires", -58.3816, -34.6037, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), new DijkstraRouter()),
+                        new GroundStation("Vienna", 16.3738, 48.2082, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), routerBuilder.Build()),
+                        new GroundStation("Reykjavik", -21.8277, 64.1283, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), routerBuilder.Build()),
+                        new GroundStation("New York", -74.0060, 40.7128, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), routerBuilder.Build()),
+                        new GroundStation("Sydney", 151.2093, -33.8688, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), routerBuilder.Build()),
+                        new GroundStation("Buenos Aires", -58.3816, -34.6037, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), routerBuilder.Build()),
                     ];
                 all.AddRange(groundStations);
             }

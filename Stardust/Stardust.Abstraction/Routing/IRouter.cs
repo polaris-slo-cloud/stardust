@@ -5,6 +5,8 @@ namespace Stardust.Abstraction.Routing;
 
 public interface IRouter
 {
+    public bool CanPreRouteCalc { get; }
+    public bool CanOnRouteCalc { get; }
     public void Mount(Node.Node node);
     public Task SendAdvertismentsAsync();
     public Task ReceiveAdvertismentsAsync(RouteAdvertisment routeAdvertisment);

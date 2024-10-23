@@ -9,7 +9,6 @@ namespace Stardust.Abstraction.Node;
 
 public class Satellite : Node
 {
-    public string Name { get; private set; }
     public double Inclination { get; private set; }  // degrees
     public double InclinationRad { get; } // radians
     public double RightAscension { get; private set; }  // degrees
@@ -25,11 +24,10 @@ public class Satellite : Node
     public List<GroundLink> GroundLinks { get; } = [];
 
     public override List<ILink> Links { get => InterSatelliteLinkProtocol.Links.Cast<ILink>().ToList(); }
-    public override List<ILink> Established { get => InterSatelliteLinkProtocol.Established.Cast<ILink>().ToList(); }
+    public override List<ILink> Established { get => InterSatelliteLinkProtocol.Established.Cast<ILink>().Concat(GroundLinks).ToList(); }
 
-    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, DateTime simulationTime, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, IRouter router) : base(router)
+    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, DateTime simulationTime, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, IRouter router) : base(router, name)
     {
-        Name = name;
         Inclination = inclination;
         InclinationRad = inclination.DegToRad();
         RightAscension = rightAscension;
@@ -153,11 +151,8 @@ public class Satellite : Node
                 }
 
                 var link = new IslLink(this, satellite);
-                InterSatelliteLinkProtocol.AddLink(link);
-                if (InterSatelliteLinkProtocol != satellite.InterSatelliteLinkProtocol)
-                {
-                    satellite.InterSatelliteLinkProtocol.AddLink(link);
-                }
+                this.InterSatelliteLinkProtocol.AddLink(link);
+                satellite.InterSatelliteLinkProtocol.AddLink(link);
             }
         }, satellites);
     }

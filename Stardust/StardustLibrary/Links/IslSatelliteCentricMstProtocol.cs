@@ -1,27 +1,38 @@
-﻿using Stardust.Abstraction.Exceptions;
+﻿using Stardust.Abstraction;
+using Stardust.Abstraction.Exceptions;
 using Stardust.Abstraction.Links;
 using Stardust.Abstraction.Node;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace StardustLibrary.Links.SatelliteLink;
+namespace StardustLibrary.Links;
 
-public class IslOtherMstProtocol : IInterSatelliteLinkProtocol
+public class IslSatelliteCentricMstProtocol : IInterSatelliteLinkProtocol
 {
-    private List<IslLink> links = new List<IslLink>(2 ^ 22);
-    public ICollection<IslLink> Links { get => links; }
+    private readonly List<IslLink> links = new(2 ^ 22);
+    public ICollection<IslLink> Links
+    {
+        get
+        {
+            lock (links)
+            {
+                return links.ToList();
+            }
+        }
+    }
 
     private List<IslLink> established = [];
     public ICollection<IslLink> Established { get => established; }
 
     private Satellite? satellite;
     private List<Satellite>? satellites;
-    private Dictionary<Satellite, Satellite>? representatives;
     private (double X, double Y, double Z) calculatedPosition;
 
-    private readonly Dictionary<Satellite, IEnumerable<(double Distance, IslLink Link)>> inDistance = [];
+    private readonly HashSet<Satellite> visited = [];
     private readonly PriorityQueue<IslLink, double> priorityQueue = new();
+    private readonly ManualResetEvent resetEvent = new(true);
 
     public Task Connect(Satellite satellite)
     {
@@ -59,51 +70,54 @@ public class IslOtherMstProtocol : IInterSatelliteLinkProtocol
 
         if (calculatedPosition == satellite.Position)
         {
+            resetEvent.WaitOne();
             return Task.FromResult(established);
         }
         lock (this)
         {
             if (calculatedPosition == satellite.Position)
             {
+                resetEvent.WaitOne();
                 return Task.FromResult(established);
             }
             calculatedPosition = satellite.Position;
+            resetEvent.Reset();
         }
 
-        if (satellites == null || representatives == null)
-        {
-            satellites = satellite.InterSatelliteLinkProtocol.Links.Select(s => s.Satellite1).Concat(satellite.InterSatelliteLinkProtocol.Links.Select(s => s.Satellite2)).Distinct().ToList();
-            representatives = satellites.ToDictionary(s => s, s => s);
-        }
+        satellites ??= satellite.InterSatelliteLinkProtocol.Links.Select(s => s.Satellite1).Concat(satellite.InterSatelliteLinkProtocol.Links.Select(s => s.Satellite2)).Distinct().ToList();
 
         var list = new List<IslLink>(satellites.Count);
-        inDistance.Clear();
+        visited.Clear();
         priorityQueue.Clear();
 
         var linkDistance = satellite.InterSatelliteLinkProtocol.Links.Select(l => (l.Distance, l)).Where(l => l.Distance <= Physics.MAX_ISL_DISTANCE);
-        inDistance.Add(satellite, linkDistance);
+        visited.Add(satellite);
         foreach ((double distance, IslLink l) in linkDistance)
         {
             priorityQueue.Enqueue(l, distance);
         }
 
-        while (priorityQueue.Count > 0)
+        while (list.Count < satellites.Count - 1 && priorityQueue.Count > 0)
         {
             var link = priorityQueue.Dequeue();
-            if (inDistance.ContainsKey(link.Satellite1) && inDistance.ContainsKey(link.Satellite2))
+            if (visited.Contains(link.Satellite1) && visited.Contains(link.Satellite2))
             {
                 continue;
             }
 
-            Satellite s = inDistance.ContainsKey(link.Satellite1) ? link.Satellite2 : link.Satellite1;
+            Satellite s = visited.Contains(link.Satellite1) ? link.Satellite2 : link.Satellite1;
 
-            linkDistance = s.InterSatelliteLinkProtocol.Links.Select(l => (l.Distance, l)).Where(l => l.Distance <= Physics.MAX_ISL_DISTANCE);
+            List<(double Distance, IslLink l)> linkDistance2;
+            lock (s.InterSatelliteLinkProtocol.Links)
+            {
+                linkDistance2 = s.InterSatelliteLinkProtocol.Links.Select(l => (l.Distance, l)).Where(l => l.Distance <= Physics.MAX_ISL_DISTANCE).ToList();
+            }
             list.Add(link);
-            inDistance.Add(s, linkDistance);
-            foreach ((double distance, IslLink l) in linkDistance)
+            visited.Add(s);
+            foreach ((double distance, IslLink l) in linkDistance2)
             {
                 Satellite other = l.GetOther(s);
-                if (!inDistance.ContainsKey(other))
+                if (!visited.Contains(other))
                 {
                     priorityQueue.Enqueue(l, distance);
                 }
@@ -124,6 +138,7 @@ public class IslOtherMstProtocol : IInterSatelliteLinkProtocol
         }
 
         established = list;
+        resetEvent.Set();
         return Task.FromResult(list);
     }
 

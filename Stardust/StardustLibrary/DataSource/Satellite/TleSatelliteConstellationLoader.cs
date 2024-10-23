@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Stardust.Abstraction.DataSource;
 using Stardust.Abstraction.Links;
 using System;
@@ -15,16 +16,18 @@ public class TleSatelliteConstellationLoader : ISatelliteConstellationLoader
     private const string CANNOT_PARSE = "Cannot parse tle data source";
 
     private readonly InterSatelliteLinkConfig config;
+    private readonly SatelliteBuilder satelliteBuilder;
     private readonly ILogger<TleSatelliteConstellationLoader>? logger;
 
-    public TleSatelliteConstellationLoader(InterSatelliteLinkConfig config, SatelliteConstellationLoader constellationLoader, ILogger<TleSatelliteConstellationLoader>? logger = default) : this(config, logger)
+    public TleSatelliteConstellationLoader(InterSatelliteLinkConfig config, SatelliteBuilder satelliteBuilder, SatelliteConstellationLoader constellationLoader, ILogger<TleSatelliteConstellationLoader>? logger = default) : this(config, satelliteBuilder, logger)
     {
         constellationLoader.RegisterDataSourceLoader(DATA_SOURCE_TYPE, this);
     }
 
-    public TleSatelliteConstellationLoader(InterSatelliteLinkConfig config, ILogger<TleSatelliteConstellationLoader>? logger = default)
+    public TleSatelliteConstellationLoader(InterSatelliteLinkConfig config, SatelliteBuilder satelliteBuilder, ILogger<TleSatelliteConstellationLoader>? logger = default)
     {
         this.config = config;
+        this.satelliteBuilder = satelliteBuilder;
         this.logger = logger;
     }
 
@@ -66,7 +69,7 @@ public class TleSatelliteConstellationLoader : ISatelliteConstellationLoader
                 name = line1.Substring(2, 4);
             }
 
-            var builder = new SatelliteBuilder();
+            var builder = satelliteBuilder;
 
             builder.SetName(name);
             builder.SetInclination(double.Parse(line2.Substring(8, 8).Trim(), CultureInfo.InvariantCulture)); // Inclination in degrees

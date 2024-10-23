@@ -22,6 +22,7 @@ public class SimulationService : BackgroundService
 
     private List<Satellite> satellites = [];
     private List<GroundStation> groundStations = [];
+    private List<Node> nodes = [];
 
     public SimulationService(ISimulationController simulationControllerService, SimulationConfiguration simulationConfiguration, ILogger<SimulationService> logger)
     {
@@ -35,8 +36,8 @@ public class SimulationService : BackgroundService
         logger.LogInformation("Staring simulation ...");
 
         satellites = await simulationController.GetAllNodesAsync<Satellite>();
-
         groundStations = await simulationController.GetAllNodesAsync<GroundStation>();
+        nodes = await simulationController.GetAllNodesAsync();
 
         await base.StartAsync(cancellationToken);
     }
@@ -79,8 +80,7 @@ public class SimulationService : BackgroundService
                     logger.LogInformation("Simulation time is {0}", simTime.ToString());
 
                     // Update all satellite positions
-                    logger.LogInformation("UpdatePosition start: {0}ms", sw.ElapsedMilliseconds);
-                    Parallel.ForEach(satellites, async (s) => await s.UpdatePosition(simTime).ConfigureAwait(false));
+                    Parallel.ForEach(nodes, async (n) => await n.UpdatePosition(simTime).ConfigureAwait(false));
                     //foreach (var satellite in satellites)
                     //{
                     //    await satellite.UpdatePosition(simTime).ConfigureAwait(false);
@@ -96,22 +96,23 @@ public class SimulationService : BackgroundService
 
 
                     // Update all ground station positions based on Earth's rotation
-                    foreach (var groundStation in groundStations)
-                    {
-                        await groundStation.UpdatePosition(simTime).ConfigureAwait(false);
-                    }
-
-                    logger.LogInformation("UpdateGroundStation after {0}ms", sw.ElapsedMilliseconds);
-
-                    Parallel.ForEach(satellites, async (s) => await s.Router.SendAdvertismentsAsync());
-                    //foreach (var satellite in satellites)
+                    //foreach (var groundStation in groundStations)
                     //{
-                    //    var watch = Stopwatch.StartNew();
-                    //    await satellite.Router.SendAdvertismentsAsync();
-                    //    logger.LogInformation("CalculateRoutingTableAsync took {0}ms", watch.ElapsedMilliseconds);
+                    //    await groundStation.UpdatePosition(simTime).ConfigureAwait(false);
                     //}
+                    //logger.LogInformation("UpdateGroundStation after {0}ms", sw.ElapsedMilliseconds);
 
-                    logger.LogInformation("CalculateRoutingTableAsync after {0}ms", sw.ElapsedMilliseconds);
+                    if (simulationConfiguration.UsePreRouteCalc)
+                    {
+                        Parallel.ForEach(satellites, async (s) => await s.Router.SendAdvertismentsAsync());
+                        //foreach (var satellite in satellites)
+                        //{
+                        //    var watch = Stopwatch.StartNew();
+                        //    await satellite.Router.SendAdvertismentsAsync();
+                        //    logger.LogInformation("CalculateRoutingTableAsync took {0}ms", watch.ElapsedMilliseconds);
+                        //}
+                        logger.LogInformation("CalculateRoutingTableAsync after {0}ms", sw.ElapsedMilliseconds);
+                    }
 
                     // Find and display the nearest satellite for each ground station
                     if (logger.IsEnabled(LogLevel.Trace))

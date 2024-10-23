@@ -4,7 +4,7 @@ using System;
 
 namespace StardustLibrary.DataSource.Satellite;
 
-internal class SatelliteBuilder
+public class SatelliteBuilder(RouterBuilder routerBuilder)
 {
     private string? name;
     private double inclination;
@@ -73,6 +73,6 @@ internal class SatelliteBuilder
 
     public Stardust.Abstraction.Node.Satellite Build()
     {
-        return new Stardust.Abstraction.Node.Satellite(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, islProtocolBuilder.Build(), new DijkstraRouter());
+        return new Stardust.Abstraction.Node.Satellite(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, islProtocolBuilder.Build(), routerBuilder.Build());
     }
 }

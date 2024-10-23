@@ -29,14 +29,14 @@ public class IslProtocolBuilder
         }
     }
 
-    private IslOtherMstProtocol? otherMstProtocol;
-    private IslOtherMstProtocol OtherMstProtocol
+    private IslSatelliteCentricMstProtocol? otherMstProtocol;
+    private IslSatelliteCentricMstProtocol OtherMstProtocol
     {
         get
         {
             lock (this)
             {
-                otherMstProtocol ??= new IslOtherMstProtocol();
+                otherMstProtocol ??= new IslSatelliteCentricMstProtocol();
             }
             return otherMstProtocol;
         }

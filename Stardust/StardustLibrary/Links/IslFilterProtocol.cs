@@ -12,7 +12,7 @@ public class IslFilterProtocol(IInterSatelliteLinkProtocol protocol) : IInterSat
 {
     private Satellite? satellite;
 
-    private readonly List<IslLink> links = [];
+    private readonly HashSet<IslLink> links = [];
     public ICollection<IslLink> Links => links;
 
     private List<IslLink> established = [];
@@ -33,10 +33,7 @@ public class IslFilterProtocol(IInterSatelliteLinkProtocol protocol) : IInterSat
         {
             lock (links)
             {
-                if (!links.Contains(link))
-                {
-                    links.Add(link);
-                }
+                links.Add(link);
             }
         }
         protocol.AddLink(link);
@@ -49,7 +46,7 @@ public class IslFilterProtocol(IInterSatelliteLinkProtocol protocol) : IInterSat
             throw new ArgumentException("The satellite must not be the mounted satellite.");
         }
 
-        var link = links.Find(l => l.Satellite1 == satellite || l.Satellite2 == satellite);
+        var link = links.First(l => l.Satellite1 == satellite || l.Satellite2 == satellite);
         if (link != null)
         {
             await Connect(link);
@@ -79,7 +76,7 @@ public class IslFilterProtocol(IInterSatelliteLinkProtocol protocol) : IInterSat
             throw new ArgumentException("The satellite must not be the mounted satellite.");
         }
 
-        var link = links.Find(l => l.Satellite1 == satellite || l.Satellite2 == satellite);
+        var link = links.First(l => l.Satellite1 == satellite || l.Satellite2 == satellite);
         if (link != null)
         {
             await Disconnect(link);

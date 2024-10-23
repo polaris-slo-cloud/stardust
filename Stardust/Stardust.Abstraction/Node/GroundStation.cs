@@ -9,7 +9,6 @@ namespace Stardust.Abstraction.Node;
 public class GroundStation : Node
 {
 
-    public string Name { get; }
     private double Latitude { get; }
     private double Longitude { get; }
     public DateTime SimulationStartTime { get; }
@@ -18,9 +17,8 @@ public class GroundStation : Node
     public override List<ILink> Links => [GroundSatelliteLinkProtocol.Link];
     public override List<ILink> Established => [GroundSatelliteLinkProtocol.Link];
 
-    public GroundStation(string name, double longitude, double latitude, IGroundSatelliteLinkProtocol groundSatelliteLinkProtocol, DateTime simulationStartTime, IRouter router) : base(router)
+    public GroundStation(string name, double longitude, double latitude, IGroundSatelliteLinkProtocol groundSatelliteLinkProtocol, DateTime simulationStartTime, IRouter router) : base(router, name)
     {
-        Name = name;
         Latitude = latitude;
         Longitude = longitude;
         SimulationStartTime = simulationStartTime;

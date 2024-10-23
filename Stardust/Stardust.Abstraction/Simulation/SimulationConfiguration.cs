@@ -22,4 +22,6 @@ public class SimulationConfiguration
     public required string SatelliteDataSource { get; set; }
 
     public required string SatelliteDataSourceType { get; set; }
+
+    public required bool UsePreRouteCalc {  get; set; }
 }

@@ -1,8 +1,8 @@
-﻿using Stardust.Abstraction.Exceptions;
+﻿using Stardust.Abstraction;
+using Stardust.Abstraction.Exceptions;
 using Stardust.Abstraction.Links;
 using Stardust.Abstraction.Node;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -12,13 +12,12 @@ namespace StardustLibrary.Links;
 
 public class IslMstProtocol : IInterSatelliteLinkProtocol
 {
-    private readonly HashSet<IslLink> setLink = new();
-    private readonly List<IslLink> links = new(2 ^ 20);
+    private readonly HashSet<IslLink> setLink = new(2 ^ 22);
     public ICollection<IslLink> Links { get 
         {
-            lock (links)
+            lock (setLink)
             {
-                return links.ToList();
+                return setLink.ToList();
             }
         } 
     }
@@ -149,13 +148,9 @@ public class IslMstProtocol : IInterSatelliteLinkProtocol
 
     public void AddLink(IslLink link)
     {
-        lock (this.links)
+        lock (setLink)
         {
-            if (!setLink.Contains(link))
-            {
-                links.Add(link);
-                setLink.Add(link);
-            }
+            setLink.Add(link);
         }
     }
 

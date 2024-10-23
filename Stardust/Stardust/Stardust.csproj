@@ -15,7 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="starlink.tle">
+    <None Update="starlink_3000.tle">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="starlink_6000.tle">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

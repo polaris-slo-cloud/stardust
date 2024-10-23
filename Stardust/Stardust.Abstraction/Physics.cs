@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Stardust.Abstraction.Node;
+namespace Stardust.Abstraction;
 
 public static class Physics
 {
@@ -22,7 +22,7 @@ public static class Physics
     /// <summary>
     /// Maximal distance for two satellites to communicate in m.
     /// </summary>
-    public const double MAX_ISL_DISTANCE = 700_000;
+    public const double MAX_ISL_DISTANCE = 5_000_000;
 
     /// <summary>
     /// Speed of light in m/s.

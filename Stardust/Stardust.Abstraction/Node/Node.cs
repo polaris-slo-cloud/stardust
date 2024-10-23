@@ -10,15 +10,17 @@ public abstract class Node
 {
     public Computing.Computing Computing { get; }
     public IRouter Router { get; set; }
+    public string Name { get; }
     public (double X, double Y, double Z) Position { get; protected set; }
 
     public abstract List<ILink> Links { get; }
     public abstract List<ILink> Established { get; }
 
-    protected Node(IRouter router)
+    protected Node(IRouter router, string name)
     {
         Router = router;
         Router.Mount(this);
+        Name = name;
     }
 
     /// <summary>

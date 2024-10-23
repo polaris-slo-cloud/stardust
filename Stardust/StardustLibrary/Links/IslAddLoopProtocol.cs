@@ -1,4 +1,5 @@
-﻿using Stardust.Abstraction.Links;
+﻿using Stardust.Abstraction;
+using Stardust.Abstraction.Links;
 using Stardust.Abstraction.Node;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +46,7 @@ public class IslAddLoopProtocol(IInterSatelliteLinkProtocol protocol, InterSatel
     {
         var list = await protocol.UpdateLinks();
         var established = list.ToList();
-        if (established.Count > 0)
+        if (established.Count > 0 && established.Count < config.Neighbours - 1)
         {
             (double Distance, IslLink Link) consider = default;
             lock (Links)
@@ -71,10 +72,10 @@ public class IslAddLoopProtocol(IInterSatelliteLinkProtocol protocol, InterSatel
             }
         }
 
-        return established;
+        return established; // TODO loop links are not in established
     }
 
     private bool ShouldLoop(List<ILink> links) {
-        return links.Count < config.Neighbours - 1;
+        return links.Count < config.Neighbours;
     }
 }
