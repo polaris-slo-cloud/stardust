@@ -30,11 +30,11 @@ builder.Services.AddSingleton(new SimulationConfiguration
 builder.Services.AddSingleton(new InterSatelliteLinkConfig
 {
     Neighbours = 4,
-    Protocol = "other_mst_loop"
+    Protocol = "mst_loop"
 });
 builder.Services.AddSingleton(new RouterConfig
 {
-    Protocol = "a-star"
+    Protocol = "dijkstra"
 });
 
 builder.Services.AddSingleton<SimulationService>();
@@ -81,6 +81,7 @@ while (++steps > 0)
     }
 
     await simulationController.StepAsync();
+    await source.Router.SendAdvertismentsAsync(); // pre routing for dijkstra
     foreach (var target in targets)
     {
         var sw = Stopwatch.StartNew();
