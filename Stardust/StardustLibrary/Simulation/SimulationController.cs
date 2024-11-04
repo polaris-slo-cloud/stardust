@@ -17,6 +17,7 @@ public class SimulationController : ISimulationController
     private readonly SatelliteConstellationLoader constellationLoader;
     private readonly SimulationConfiguration configuration;
     private readonly RouterBuilder routerBuilder;
+    private readonly ComputingBuilder computingBuilder;
     private readonly ILogger<SimulationController> logger;
 
 
@@ -26,18 +27,20 @@ public class SimulationController : ISimulationController
     private readonly List<Node> all = [];
 
     private bool autorun;
-    private readonly AutoResetEvent resetEvent = new(false);
     private readonly SemaphoreSlim stepEvent = new(0);
     private readonly SemaphoreSlim stepCompleteEvent = new(0);
 
-    public SimulationController(SatelliteConstellationLoader constellationLoader, SimulationConfiguration configuration, RouterBuilder routerBuilder, ILogger<SimulationController> logger)
+    public SimulationController(SatelliteConstellationLoader constellationLoader, SimulationConfiguration configuration, RouterBuilder routerBuilder, ComputingBuilder computingBuilder, ILogger<SimulationController> logger)
     {
         this.constellationLoader = constellationLoader;
         this.configuration = configuration;
         this.routerBuilder = routerBuilder;
+        this.computingBuilder = computingBuilder;
         this.logger = logger;
 
         this.autorun = configuration.StepInterval >= 0;
+
+        routerBuilder.Nodes = all;
     }
 
     #region simulation
@@ -60,7 +63,7 @@ public class SimulationController : ISimulationController
             return false;
         }
         stepEvent.Release();
-        await stepCompleteEvent.WaitAsync();
+        await stepCompleteEvent.WaitAsync().ConfigureAwait(false);
         return true;
     }
 
@@ -131,13 +134,18 @@ public class SimulationController : ISimulationController
         {
             if (groundStations == null)
             {
+                if (satellites == null)
+                {
+                    await GetAllNodesInternalAsync<Satellite>();
+                }
                 groundStations =
                     [
-                        new GroundStation("Vienna", 16.3738, 48.2082, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), routerBuilder.Build()),
-                        new GroundStation("Reykjavik", -21.8277, 64.1283, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), routerBuilder.Build()),
-                        new GroundStation("New York", -74.0060, 40.7128, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), routerBuilder.Build()),
-                        new GroundStation("Sydney", 151.2093, -33.8688, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), routerBuilder.Build()),
-                        new GroundStation("Buenos Aires", -58.3816, -34.6037, new GroundSatelliteNearestProtocol(await GetAllNodesAsync<Satellite>().ConfigureAwait(false)), routerBuilder.Build()),
+                        new GroundStation("Vienna", 16.3738, 48.2082, new GroundSatelliteNearestProtocol(satellites), routerBuilder.Build(), computingBuilder.WithComputingType(ComputingType.Cloud).Build()),
+                        new GroundStation("Bratislava", 17.1077, 48.1486, new GroundSatelliteNearestProtocol(satellites), routerBuilder.Build(), computingBuilder.WithComputingType(ComputingType.Cloud).Build()),
+                        new GroundStation("Reykjavik", -21.8277, 64.1283, new GroundSatelliteNearestProtocol(satellites), routerBuilder.Build(), computingBuilder.WithComputingType(ComputingType.Cloud).Build()),
+                        new GroundStation("New York", -74.0060, 40.7128, new GroundSatelliteNearestProtocol(satellites), routerBuilder.Build(), computingBuilder.WithComputingType(ComputingType.Cloud).Build()),
+                        new GroundStation("Sydney", 151.2093, -33.8688, new GroundSatelliteNearestProtocol(satellites), routerBuilder.Build(), computingBuilder.WithComputingType(ComputingType.Cloud).Build()),
+                        new GroundStation("Buenos Aires", -58.3816, -34.6037, new GroundSatelliteNearestProtocol(satellites), routerBuilder.Build(), computingBuilder.WithComputingType(ComputingType.Cloud).Build()),
                     ];
                 all.AddRange(groundStations);
             }

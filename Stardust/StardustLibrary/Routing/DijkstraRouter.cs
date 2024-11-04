@@ -1,5 +1,4 @@
-﻿using Stardust.Abstraction.Computing;
-using Stardust.Abstraction.Exceptions;
+﻿using Stardust.Abstraction.Exceptions;
 using Stardust.Abstraction.Links;
 using Stardust.Abstraction.Node;
 using Stardust.Abstraction.Routing;
@@ -16,7 +15,8 @@ public class DijkstraRouter : IRouter
     public bool CanOnRouteCalc => true;
 
     private readonly SortedSet<(ILink, Node, ILink, double)> priorityQueue = new(Comparer<(ILink, Node, ILink, double)>.Create((l1, l2) => l1.Item1.Latency == l2.Item1.Latency ? 0 : l1.Item1.Latency < l2.Item1.Latency ? -1 : 1));
-    private readonly Dictionary<Node, (ILink OutLink, double Latency)> routes = [];
+    private readonly Dictionary<Node, (ILink OutLink, IRouteResult Route)> routes = [];
+    private readonly Dictionary<string, (ILink OutLink, IRouteResult Route)> serviceRoutes = [];
     private Node? selfNode;
 
     public void Mount(Node node)
@@ -33,7 +33,32 @@ public class DijkstraRouter : IRouter
         throw new NotImplementedException();
     }
 
-    public async Task Route(Node target, Workload workload)
+    public async Task<IRouteResult> RouteAsync(string targetServiceName, IPayload? payload = null)
+    {
+        if (selfNode == null)
+        {
+            throw new MountException("Router is not mounted to a satellite.");
+        }
+        if (selfNode.Computing.Services.Any(s => s.ServiceName == targetServiceName))
+        {
+            return PreRouteResult.ZeroLatencyRoute;
+        }
+
+        if (!serviceRoutes.TryGetValue(targetServiceName, out (ILink OutLink, IRouteResult Result) tableEntry) || !selfNode.Established.Contains(tableEntry.OutLink))
+        {
+            var start = DateTime.UtcNow;
+            await SendAdvertismentsAsync();
+            if (!serviceRoutes.TryGetValue(targetServiceName, out tableEntry))
+            {
+                return UnreachableRouteResult.Instance;
+            }
+            return tableEntry.Result.AddCalculationDuration((int)(DateTime.UtcNow - start).TotalMilliseconds);
+        }
+
+        return tableEntry.Result;
+    }
+
+    public async Task<IRouteResult> RouteAsync(Node target, IPayload? payload)
     {
         if (selfNode == null)
         {
@@ -41,18 +66,21 @@ public class DijkstraRouter : IRouter
         }
         if (target == selfNode)
         {
-            return;
+            return PreRouteResult.ZeroLatencyRoute;
         }
 
-        if (!routes.TryGetValue(target, out (ILink OutLink, double Latency) tableEntry) || !selfNode.Established.Contains(tableEntry.OutLink))
+        if (!routes.TryGetValue(target, out (ILink OutLink, IRouteResult Result) tableEntry) || !selfNode.Established.Contains(tableEntry.OutLink))
         {
+            var start = DateTime.UtcNow;
             await SendAdvertismentsAsync();
             if (!routes.TryGetValue(target, out tableEntry))
             {
-                throw new Exception("No route.");
+                return UnreachableRouteResult.Instance;
             }
+            return tableEntry.Result.AddCalculationDuration((int)(DateTime.UtcNow - start).TotalMilliseconds);
         }
-        await Task.Delay((int)tableEntry.Latency);
+
+        return tableEntry.Result;
     }
 
     public Task SendAdvertismentsAsync()
@@ -85,7 +113,12 @@ public class DijkstraRouter : IRouter
                 continue;
             }
 
-            routes.Add(advertised, (advertisedVia, latencyToAdvertised));
+            routes.Add(advertised, (advertisedVia, new PreRouteResult((int)latencyToAdvertised)));
+            foreach (var service in advertised.Computing.Services)
+            {
+                serviceRoutes.Add(service.ServiceName, (advertisedVia, new PreRouteResult((int)latencyToAdvertised)));
+            }
+
             foreach (var addLink in advertised.Established) 
             {
                 var other = addLink.GetOther(advertised);

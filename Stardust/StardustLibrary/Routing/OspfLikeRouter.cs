@@ -1,5 +1,4 @@
-﻿using Stardust.Abstraction.Computing;
-using Stardust.Abstraction.Exceptions;
+﻿using Stardust.Abstraction.Exceptions;
 using Stardust.Abstraction.Links;
 using Stardust.Abstraction.Node;
 using Stardust.Abstraction.Routing;
@@ -48,14 +47,18 @@ internal class OspfLikeRouter : IRouter
         return Task.CompletedTask;
     }
 
-    public Task Route(Node target, Workload workload)
+    public Task<IRouteResult> RouteAsync(Node target, IPayload? payload)
     {
+        if (selfNode == target)
+        {
+            return Task.FromResult<IRouteResult>(PreRouteResult.ZeroLatencyRoute);
+        }
+
         if (!routingTable.TryGetValue(target, out var route))
         {
             throw new ApplicationException("No route found");
         }
-        route.NextHop.Router.Route(target, workload);
-        return Task.CompletedTask;
+        return route.NextHop.Router.RouteAsync(target, payload);
     }
 
     public async Task SendAdvertismentsAsync()
@@ -100,5 +103,10 @@ internal class OspfLikeRouter : IRouter
                 }
             }
         }
+    }
+
+    public Task<IRouteResult> RouteAsync(string targetServiceName, IPayload? payload)
+    {
+        throw new NotImplementedException();
     }
 }

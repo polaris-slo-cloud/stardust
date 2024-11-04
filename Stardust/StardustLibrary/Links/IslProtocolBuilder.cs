@@ -1,6 +1,5 @@
 ﻿using Stardust.Abstraction.Exceptions;
 using Stardust.Abstraction.Links;
-using StardustLibrary.Links.SatelliteLink;
 using System;
 
 namespace StardustLibrary.Links;

@@ -1,5 +1,4 @@
-﻿using Stardust.Abstraction.Computing;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Stardust.Abstraction.Routing;
 
@@ -10,5 +9,6 @@ public interface IRouter
     public void Mount(Node.Node node);
     public Task SendAdvertismentsAsync();
     public Task ReceiveAdvertismentsAsync(RouteAdvertisment routeAdvertisment);
-    public Task Route(Node.Node target, Workload workload);
+    public Task<IRouteResult> RouteAsync(Node.Node target, IPayload? payload = null);
+    public Task<IRouteResult> RouteAsync(string targetServiceName, IPayload? payload = null);
 }

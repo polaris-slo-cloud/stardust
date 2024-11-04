@@ -2,7 +2,8 @@
 
 public enum ComputingType
 {
-    None,
-    Edge,
-    Cloud,
+    None = 0,
+    Edge = 1,
+    Cloud = 2,
+    Any = 3,
 }

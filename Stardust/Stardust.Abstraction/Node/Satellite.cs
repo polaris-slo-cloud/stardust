@@ -26,7 +26,7 @@ public class Satellite : Node
     public override List<ILink> Links { get => InterSatelliteLinkProtocol.Links.Cast<ILink>().ToList(); }
     public override List<ILink> Established { get => InterSatelliteLinkProtocol.Established.Cast<ILink>().Concat(GroundLinks).ToList(); }
 
-    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, DateTime simulationTime, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, IRouter router) : base(router, name)
+    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, DateTime simulationTime, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, IRouter router, Computing.Computing computing) : base(name, router, computing)
     {
         Inclination = inclination;
         InclinationRad = inclination.DegToRad();
@@ -43,8 +43,8 @@ public class Satellite : Node
         UpdatePosition(simulationTime).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
-    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, IRouter router)
-        : this(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, DateTime.UtcNow, interSatelliteLinkProtocol, router)
+    public Satellite(string name, double inclination, double rightAscension, double eccentricity, double argumetOfPerigee, double meanAnomaly, double meanMotion, DateTime epoch, IInterSatelliteLinkProtocol interSatelliteLinkProtocol, IRouter router, Computing.Computing computing)
+        : this(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, DateTime.UtcNow, interSatelliteLinkProtocol, router, computing)
     {
     }
 

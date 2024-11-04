@@ -16,11 +16,13 @@ public abstract class Node
     public abstract List<ILink> Links { get; }
     public abstract List<ILink> Established { get; }
 
-    protected Node(IRouter router, string name)
+    protected Node(string name, IRouter router, Computing.Computing computing)
     {
-        Router = router;
-        Router.Mount(this);
         Name = name;
+        Router = router;
+        Computing = computing;
+
+        Router.Mount(this);
     }
 
     /// <summary>

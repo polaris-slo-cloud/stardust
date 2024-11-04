@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Stardust.HttpService\Stardust.HttpService.csproj" />
     <ProjectReference Include="..\StardustLibrary\StardustLibrary.csproj" />
   </ItemGroup>
 

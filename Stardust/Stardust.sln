@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StardustVisualization", "St
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stardust.Abstraction", "Stardust.Abstraction\Stardust.Abstraction.csproj", "{F3DC3348-050F-4A7F-B4CA-49D0FAA481FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stardust.Tests", "Stardust.Tests\Stardust.Tests.csproj", "{4C5F77EF-AF66-4020-99D0-590862B7769A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stardust.Tests", "Stardust.Tests\Stardust.Tests.csproj", "{4C5F77EF-AF66-4020-99D0-590862B7769A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stardust.HttpService", "Stardust.HttpService\Stardust.HttpService.csproj", "{285C601A-3AC3-47FD-8394-07E143B6BFE0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{4C5F77EF-AF66-4020-99D0-590862B7769A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C5F77EF-AF66-4020-99D0-590862B7769A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C5F77EF-AF66-4020-99D0-590862B7769A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{285C601A-3AC3-47FD-8394-07E143B6BFE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{285C601A-3AC3-47FD-8394-07E143B6BFE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{285C601A-3AC3-47FD-8394-07E143B6BFE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{285C601A-3AC3-47FD-8394-07E143B6BFE0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

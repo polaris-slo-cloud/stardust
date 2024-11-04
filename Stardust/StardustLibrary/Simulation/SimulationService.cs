@@ -16,6 +16,7 @@ public class SimulationService : BackgroundService
     private readonly ISimulationController simulationController;
     private readonly SimulationConfiguration simulationConfiguration;
     private readonly ILogger<SimulationService> logger;
+    private readonly ParallelOptions _parallelOptions;
 
     private DateTime startTime;
     private DateTime simTime;
@@ -29,6 +30,10 @@ public class SimulationService : BackgroundService
         this.simulationController = simulationControllerService;
         this.simulationConfiguration = simulationConfiguration;
         this.logger = logger;
+        this._parallelOptions = new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = simulationConfiguration.MaxCpuCores,
+        };
     }
 
     public override async Task StartAsync(CancellationToken cancellationToken)
@@ -79,38 +84,17 @@ public class SimulationService : BackgroundService
                     simTime = simTime.AddSeconds(stepLength);
                     logger.LogInformation("Simulation time is {0}", simTime.ToString());
 
-                    // Update all satellite positions
-                    Parallel.ForEach(nodes, async (n) => await n.UpdatePosition(simTime).ConfigureAwait(false));
-                    //foreach (var satellite in satellites)
-                    //{
-                    //    await satellite.UpdatePosition(simTime).ConfigureAwait(false);
-                    //}
+                    // Update all node positions
+                    Parallel.ForEach(nodes, _parallelOptions, async (n) => await n.UpdatePosition(simTime).ConfigureAwait(false));
                     logger.LogInformation("UpdatePosition after {0}ms", sw.ElapsedMilliseconds);
 
-                    Parallel.ForEach(satellites, async (s) => await s.InterSatelliteLinkProtocol.UpdateLinks().ConfigureAwait(false));
-                    //foreach (var satellite in satellites)
-                    //{
-                    //    await satellite.InterSatelliteLinkProtocol.UpdateLinks().ConfigureAwait(false);
-                    //}
+                    Parallel.ForEach(satellites, _parallelOptions, async (s) => await s.InterSatelliteLinkProtocol.UpdateLinks().ConfigureAwait(false));
+                    Parallel.ForEach(groundStations, _parallelOptions, async (g) => await g.GroundSatelliteLinkProtocol.UpdateLink().ConfigureAwait(false));
                     logger.LogInformation("UpdateLinks after {0}ms", sw.ElapsedMilliseconds);
-
-
-                    // Update all ground station positions based on Earth's rotation
-                    //foreach (var groundStation in groundStations)
-                    //{
-                    //    await groundStation.UpdatePosition(simTime).ConfigureAwait(false);
-                    //}
-                    //logger.LogInformation("UpdateGroundStation after {0}ms", sw.ElapsedMilliseconds);
 
                     if (simulationConfiguration.UsePreRouteCalc)
                     {
-                        Parallel.ForEach(satellites, async (s) => await s.Router.SendAdvertismentsAsync());
-                        //foreach (var satellite in satellites)
-                        //{
-                        //    var watch = Stopwatch.StartNew();
-                        //    await satellite.Router.SendAdvertismentsAsync();
-                        //    logger.LogInformation("CalculateRoutingTableAsync took {0}ms", watch.ElapsedMilliseconds);
-                        //}
+                        Parallel.ForEach(satellites, _parallelOptions, async (s) => await s.Router.SendAdvertismentsAsync().ConfigureAwait(false));
                         logger.LogInformation("CalculateRoutingTableAsync after {0}ms", sw.ElapsedMilliseconds);
                     }
 

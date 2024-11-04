@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace StardustLibrary.Links.SatelliteLink;
+namespace StardustLibrary.Links;
 
 public class IslNearestProtocol : IInterSatelliteLinkProtocol
 {

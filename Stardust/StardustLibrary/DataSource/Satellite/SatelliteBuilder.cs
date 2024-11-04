@@ -1,10 +1,11 @@
-﻿using StardustLibrary.Links;
+﻿using Stardust.Abstraction.Computing;
+using StardustLibrary.Links;
 using StardustLibrary.Routing;
 using System;
 
 namespace StardustLibrary.DataSource.Satellite;
 
-public class SatelliteBuilder(RouterBuilder routerBuilder)
+public class SatelliteBuilder(RouterBuilder routerBuilder, ComputingBuilder computingBuilder)
 {
     private string? name;
     private double inclination;
@@ -73,6 +74,7 @@ public class SatelliteBuilder(RouterBuilder routerBuilder)
 
     public Stardust.Abstraction.Node.Satellite Build()
     {
-        return new Stardust.Abstraction.Node.Satellite(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, islProtocolBuilder.Build(), routerBuilder.Build());
+        return new Stardust.Abstraction.Node.Satellite(name, inclination, rightAscension, eccentricity, argumetOfPerigee, meanAnomaly, meanMotion, epoch, 
+            islProtocolBuilder.Build(), routerBuilder.Build(), computingBuilder.WithComputingType(ComputingType.Edge).Build());
     }
 }

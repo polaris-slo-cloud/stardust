@@ -1,19 +1,21 @@
 ﻿using Stardust.Abstraction;
-using Stardust.Abstraction.Computing;
 using Stardust.Abstraction.Exceptions;
 using Stardust.Abstraction.Node;
 using Stardust.Abstraction.Routing;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace StardustLibrary.Routing;
 
-public class AStarRouter : IRouter
+public class AStarRouter(List<Node> nodes) : IRouter
 {
     public bool CanPreRouteCalc => false;
     public bool CanOnRouteCalc => true;
 
     private Node? selfNode;
+    private readonly List<Node> nodes = nodes;
 
     public void Mount(Node node)
     {
@@ -25,16 +27,32 @@ public class AStarRouter : IRouter
 
     public Task ReceiveAdvertismentsAsync(RouteAdvertisment routeAdvertisment)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
-    public async Task Route(Node target, Workload workload)
+    public Task<IRouteResult> RouteAsync(string targetServiceName, IPayload? payload = null)
     {
         if (selfNode == null)
         {
             throw new MountException("This router is not mounted on a node.");
         }
 
+        var target = nodes.Where(n => n.Computing.Services.Any(s => s.ServiceName == targetServiceName)).OrderBy(n => n.DistanceTo(selfNode)).FirstOrDefault();
+        if (target == null)
+        {
+            return Task.FromResult<IRouteResult>(UnreachableRouteResult.Instance);
+        }
+        return RouteAsync(target, payload);
+    }
+
+    public Task<IRouteResult> RouteAsync(Node target, IPayload? payload)
+    {
+        if (selfNode == null)
+        {
+            throw new MountException("This router is not mounted on a node.");
+        }
+
+        var start = DateTime.UtcNow;
         var openSet = new PriorityQueue<(Node Node, double G), double>();
         var closedSet = new HashSet<Node>();
 
@@ -48,9 +66,7 @@ public class AStarRouter : IRouter
             }
             if (current == target)
             {
-                await Task.Delay((int)(g * 1000 / Physics.SPEED_OF_LIGHT));
-                //await target.Computing.ScheduleWorkload(workload);
-                return;
+                return Task.FromResult<IRouteResult>(new OnRouteResult((int)(g * 1000 / Physics.SPEED_OF_LIGHT), (int)(DateTime.UtcNow - start).TotalMilliseconds));
             }
 
             closedSet.Add(current);
@@ -66,12 +82,12 @@ public class AStarRouter : IRouter
                 openSet.Enqueue((other, otherG), target.DistanceTo(other));
             }
         }
-
-        throw new System.Exception("No route");
+        return Task.FromResult<IRouteResult>(UnreachableRouteResult.Instance);
     }
 
     public Task SendAdvertismentsAsync()
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
+
 }

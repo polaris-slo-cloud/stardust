@@ -24,4 +24,6 @@ public class SimulationConfiguration
     public required string SatelliteDataSourceType { get; set; }
 
     public required bool UsePreRouteCalc {  get; set; }
+
+    public required int MaxCpuCores { get; set; }
 }
