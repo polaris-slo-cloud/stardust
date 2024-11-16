@@ -91,6 +91,7 @@ public class DijkstraRouter : IRouter
         }
 
         routes.Clear();
+        serviceRoutes.Clear();
         priorityQueue.Clear();
 
         routes.Add(selfNode, default);
@@ -116,6 +117,10 @@ public class DijkstraRouter : IRouter
             routes.Add(advertised, (advertisedVia, new PreRouteResult((int)latencyToAdvertised)));
             foreach (var service in advertised.Computing.Services)
             {
+                if (serviceRoutes.ContainsKey(service.ServiceName))
+                {
+                    continue;
+                }
                 serviceRoutes.Add(service.ServiceName, (advertisedVia, new PreRouteResult((int)latencyToAdvertised)));
             }
 
