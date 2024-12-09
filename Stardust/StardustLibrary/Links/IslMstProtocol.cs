@@ -28,7 +28,7 @@ public class IslMstProtocol : IInterSatelliteLinkProtocol
     private Satellite? satellite;
     private List<Satellite>? satellites;
     private Dictionary<Satellite, Satellite>? representatives;
-    private (double X, double Y, double Z) calculatedPosition;
+    private Vector calculatedPosition;
 
     private readonly ManualResetEvent resetEvent = new(true);
 
@@ -97,7 +97,7 @@ public class IslMstProtocol : IInterSatelliteLinkProtocol
             this.representatives = satellites.ToDictionary(s => s, s => s);
         }
 
-        var mstVertices = new List<IslLink>(satellites.Count);
+        var mstVertices = new List<IslLink>(this.established.Capacity);
         var representatives = this.representatives.ToDictionary();
 
         var links = Links.Select(l => (l.Distance, l)).Where(i => i.Distance <= Physics.MAX_ISL_DISTANCE).ToList();

@@ -14,9 +14,9 @@ public class DijkstraRouter : IRouter
     public bool CanPreRouteCalc => true;
     public bool CanOnRouteCalc => true;
 
-    private readonly SortedSet<(ILink, Node, ILink, double)> priorityQueue = new(Comparer<(ILink, Node, ILink, double)>.Create((l1, l2) => l1.Item1.Latency == l2.Item1.Latency ? 0 : l1.Item1.Latency < l2.Item1.Latency ? -1 : 1));
-    private readonly Dictionary<Node, (ILink OutLink, IRouteResult Route)> routes = [];
-    private readonly Dictionary<string, (ILink OutLink, IRouteResult Route)> serviceRoutes = [];
+    private static readonly Comparer<(ILink, Node, ILink, double)> comparer = Comparer<(ILink, Node, ILink, double)>.Create(static (l1, l2) => l1.Item1.Latency == l2.Item1.Latency ? 0 : l1.Item1.Latency < l2.Item1.Latency ? -1 : 1);
+    private Dictionary<Node, (ILink OutLink, IRouteResult Route)> routes = [];
+    private Dictionary<string, (ILink OutLink, IRouteResult Route)> serviceRoutes = [];
     private Node? selfNode;
 
     public void Mount(Node node)
@@ -90,9 +90,9 @@ public class DijkstraRouter : IRouter
             throw new MountException("Router is not mounted to a satellite.");
         }
 
-        routes.Clear();
-        serviceRoutes.Clear();
-        priorityQueue.Clear();
+        var routes = new Dictionary<Node, (ILink OutLink, IRouteResult Route)>();
+        var serviceRoutes = new Dictionary<string, (ILink OutLink, IRouteResult Route)>();
+        var priorityQueue = new SortedSet<(ILink, Node, ILink, double)>(comparer);
 
         routes.Add(selfNode, default);
         foreach (var link in selfNode.Established)
@@ -124,7 +124,7 @@ public class DijkstraRouter : IRouter
                 serviceRoutes.Add(service.ServiceName, (advertisedVia, new PreRouteResult((int)latencyToAdvertised)));
             }
 
-            foreach (var addLink in advertised.Established) 
+            foreach (var addLink in advertised.Established)
             {
                 var other = addLink.GetOther(advertised);
                 if (!routes.ContainsKey(other))
@@ -133,6 +133,9 @@ public class DijkstraRouter : IRouter
                 }
             }
         }
+
+        this.routes = routes;
+        this.serviceRoutes = serviceRoutes;
 
         return Task.CompletedTask;
     }

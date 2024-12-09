@@ -26,9 +26,10 @@ public class SimulationController : ISimulationController
 
     private readonly List<Node> all = [];
 
-    private bool autorun;
     private readonly SemaphoreSlim stepEvent = new(0);
     private readonly SemaphoreSlim stepCompleteEvent = new(0);
+
+    public bool Autorun { get; private set; }
 
     public SimulationController(SatelliteConstellationLoader constellationLoader, SimulationConfiguration configuration, RouterBuilder routerBuilder, ComputingBuilder computingBuilder, ILogger<SimulationController> logger)
     {
@@ -38,7 +39,7 @@ public class SimulationController : ISimulationController
         this.computingBuilder = computingBuilder;
         this.logger = logger;
 
-        this.autorun = configuration.StepInterval >= 0;
+        this.Autorun = configuration.StepInterval >= 0;
 
         routerBuilder.Nodes = all;
     }
@@ -46,19 +47,19 @@ public class SimulationController : ISimulationController
     #region simulation
     public Task<bool> StartAutorunAsync()
     {
-        if (autorun)
+        if (Autorun)
         {
             return Task.FromResult(false);
         }
 
-        autorun = true;
+        Autorun = true;
         stepEvent.Release();
         return Task.FromResult(true);
     }
 
     public async Task<bool> StepAsync()
     {
-        if (autorun)
+        if (Autorun)
         {
             return false;
         }
@@ -67,7 +68,7 @@ public class SimulationController : ISimulationController
         return true;
     }
 
-    public Task StepEndAsync()
+    public Task WaitForStepEndAsync()
     {
         stepCompleteEvent.Release();
         return Task.CompletedTask;
@@ -75,18 +76,18 @@ public class SimulationController : ISimulationController
 
     public Task<bool> StopAutorunAsync()
     {
-        if (!autorun)
+        if (!Autorun)
         {
             return Task.FromResult(false);
         }
-        autorun = false;
+        Autorun = false;
         return Task.FromResult(true);
     }
 
     public async Task WaitForStepAsync(CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(autorun ? "Autorun" : "Step");
-        if (autorun)
+        logger.LogInformation(Autorun ? "Autorun" : "Step");
+        if (Autorun)
         {
             return;
         }

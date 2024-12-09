@@ -29,7 +29,7 @@ public class GroundStation : Node
     }
 
     public GroundStation(string name, double longitude, double latitude, IGroundSatelliteLinkProtocol groundSatelliteLinkProtocol, IRouter router, Computing.Computing computing)
-        : this(name, latitude, longitude, groundSatelliteLinkProtocol, DateTime.UtcNow, router, computing)
+        : this(name, latitude, longitude, groundSatelliteLinkProtocol, DateTime.MinValue, router, computing)
     {
     }
 
@@ -51,16 +51,16 @@ public class GroundStation : Node
         double y = Physics.EARTH_RADIUS * Math.Cos(latitudeRad) * Math.Sin(longitudeRad);
         double z = Physics.EARTH_RADIUS * Math.Sin(latitudeRad);
 
-        Position = (x, y, z);
+        Position = new Vector(x, y, z);
     }
 
     // Calculate the distance to a satellite
     public double DistanceTo(Satellite satellite)
     {
-        var (x1, y1, z1) = Position;
-        var (x2, y2, z2) = satellite.Position;
+        var pos1 = Position;
+        var pos2 = satellite.Position;
 
-        return Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2) + Math.Pow(z2 - z1, 2));
+        return Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2) + Math.Pow(pos2.Z - pos1.Z, 2));
     }
 
     public Satellite FindNearestSatellite(List<Satellite> satellites)

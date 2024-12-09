@@ -11,7 +11,7 @@ public abstract class Node
     public Computing.Computing Computing { get; }
     public IRouter Router { get; set; }
     public string Name { get; }
-    public (double X, double Y, double Z) Position { get; protected set; }
+    public Vector Position { get; protected set; }
 
     public abstract List<ILink> Links { get; }
     public abstract List<ILink> Established { get; }
@@ -40,9 +40,9 @@ public abstract class Node
     /// <returns>The distance to the other object.</returns>
     public double DistanceTo(Node other)
     {
-        var (x1, y1, z1) = Position;
-        var (x2, y2, z2) = other.Position;
+        var pos1 = Position;
+        var pos2 = other.Position;
 
-        return Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2) + Math.Pow(z2 - z1, 2));
+        return Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2) + Math.Pow(pos2.Z - pos1.Z, 2));
     }
 }

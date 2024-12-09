@@ -115,7 +115,7 @@ public class Satellite : Node
         return trueAnomaly; // True anomaly in radians
     }
 
-    private (double X, double Y, double Z) ApplyOrbitalTransformations(double xPrime, double yPrime, double zPrime)
+    private Vector ApplyOrbitalTransformations(double xPrime, double yPrime, double zPrime)
     {
         // Convert angles to radians
         double iRad = InclinationRad;
@@ -135,7 +135,7 @@ public class Satellite : Node
         double yECI = (sinRAAN * cosArgPerigee + cosRAAN * sinArgPerigee * cosInclination) * xPrime + (-sinRAAN * sinArgPerigee + cosRAAN * cosArgPerigee * cosInclination) * yPrime;
         double zECI = sinInclination * sinArgPerigee * xPrime + sinInclination * cosArgPerigee * yPrime;
 
-        return (xECI, yECI, zECI); // Position in ECI coordinates
+        return new Vector(xECI, yECI, zECI); // Position in ECI coordinates
     }
 
     public Task ConfigureConstellation(List<Satellite> satellites)

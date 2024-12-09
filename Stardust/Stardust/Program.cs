@@ -11,6 +11,7 @@ using StardustLibrary.DataSource.Satellite;
 using StardustLibrary.Deployment;
 using StardustLibrary.Routing;
 using StardustLibrary.Simulation;
+using System;
 
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
@@ -25,23 +26,24 @@ builder.Services.AddSingleton(new SimulationConfiguration
     SatelliteDataSource = "starlink_6000.tle",
     SatelliteDataSourceType = "tle",
     UsePreRouteCalc = false,
-    MaxCpuCores = 6
+    MaxCpuCores = 6,
+    SimulationStartTime = new DateTime(2024, 1, 1)
 });
 builder.Services.AddSingleton(new InterSatelliteLinkConfig
 {
     Neighbours = 4,
-    Protocol = "mst_loop"
+    Protocol = "mst_smart_loop"
 });
 builder.Services.AddSingleton(new RouterConfig
 {
-    Protocol = "a-star" // dijkstra a-star
+    Protocol = "dijkstra" // dijkstra a-star
 });
 builder.Services.AddSingleton(new ComputingConfiguration
 {
     Configurations = [
         new Computing(4, 16, ComputingType.Edge),
         new Computing(16, 64, ComputingType.Cloud),
-        ]
+    ]
 });
 
 builder.Services.AddSingleton<SimulationService>();

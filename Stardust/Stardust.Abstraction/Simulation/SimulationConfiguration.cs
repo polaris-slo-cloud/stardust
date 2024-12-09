@@ -1,4 +1,6 @@
-﻿namespace StardustLibrary.Simulation;
+﻿using System;
+
+namespace StardustLibrary.Simulation;
 
 public class SimulationConfiguration
 {
@@ -26,4 +28,6 @@ public class SimulationConfiguration
     public required bool UsePreRouteCalc {  get; set; }
 
     public required int MaxCpuCores { get; set; }
+
+    public required DateTime SimulationStartTime { get; set; }
 }

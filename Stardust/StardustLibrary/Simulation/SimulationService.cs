@@ -59,7 +59,7 @@ public class SimulationService : BackgroundService
             try
             {
                 double delta = 0;
-                startTime = simTime = DateTime.UtcNow;
+                startTime = simTime = simulationController.Autorun ? DateTime.UtcNow : simulationConfiguration.SimulationStartTime;
 
                 Stopwatch sw = Stopwatch.StartNew();
                 while (!stoppingToken.IsCancellationRequested)
@@ -127,7 +127,7 @@ public class SimulationService : BackgroundService
                     }
                     if (simulationConfiguration.StepInterval < 0)
                     {
-                        await simulationController.StepEndAsync();
+                        await simulationController.WaitForStepEndAsync();
                     }
                     logger.LogInformation("Round took {0}ms; delta: {1}ms", sw.ElapsedMilliseconds, delta);
                     sw.Restart();

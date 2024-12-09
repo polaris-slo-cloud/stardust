@@ -28,7 +28,7 @@ public class IslSatelliteCentricMstProtocol : IInterSatelliteLinkProtocol
 
     private Satellite? satellite;
     private List<Satellite>? satellites;
-    private (double X, double Y, double Z) calculatedPosition;
+    private Vector calculatedPosition;
 
     private readonly HashSet<Satellite> visited = [];
     private readonly PriorityQueue<IslLink, double> priorityQueue = new();
