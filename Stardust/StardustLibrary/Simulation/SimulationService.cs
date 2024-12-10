@@ -127,7 +127,7 @@ public class SimulationService : BackgroundService
                     }
                     if (simulationConfiguration.StepInterval < 0)
                     {
-                        await simulationController.WaitForStepEndAsync();
+                        await simulationController.SignalStepEndAsync();
                     }
                     logger.LogInformation("Round took {0}ms; delta: {1}ms", sw.ElapsedMilliseconds, delta);
                     sw.Restart();

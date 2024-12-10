@@ -68,7 +68,7 @@ public class SimulationController : ISimulationController
         return true;
     }
 
-    public Task WaitForStepEndAsync()
+    public Task SignalStepEndAsync()
     {
         stepCompleteEvent.Release();
         return Task.CompletedTask;

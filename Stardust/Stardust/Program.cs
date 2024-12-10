@@ -32,11 +32,11 @@ builder.Services.AddSingleton(new SimulationConfiguration
 builder.Services.AddSingleton(new InterSatelliteLinkConfig
 {
     Neighbours = 4,
-    Protocol = "mst_smart_loop"
+    Protocol = "mst_loop"
 });
 builder.Services.AddSingleton(new RouterConfig
 {
-    Protocol = "dijkstra" // dijkstra a-star
+    Protocol = "a-star" // dijkstra a-star
 });
 builder.Services.AddSingleton(new ComputingConfiguration
 {
@@ -60,9 +60,9 @@ builder.Services.AddTransient<ComputingBuilder>();
 
 builder.Services.AddHostedService<SimulationService>();
 builder.Services.AddHostedService<SatelliteConstellationLoaderService>();
-builder.Services.AddHostedService<ProgramService>();
-builder.Services.AddHostedService<HttpService>();
-builder.Services.AddHostedService<SendRequestsService>();
+builder.Services.AddHostedService<StatService>();
+//builder.Services.AddHostedService<HttpService>();
+//builder.Services.AddHostedService<SendRequestsService>();
 
 using var host = builder.Build();
 await host.RunAsync();

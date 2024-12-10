@@ -31,10 +31,10 @@ public interface ISimulationController
     public Task<bool> StepAsync();
 
     /// <summary>
-    /// Wait for the completion of step execution
+    /// Signal the end of a step
     /// </summary>
     /// <returns>A task, which waits for end of the step execution</returns>
-    public Task WaitForStepEndAsync();
+    public Task SignalStepEndAsync();
 
     public Task<List<Node.Node>> GetAllNodesAsync();
     public Task<List<Node.Node>> GetAllNodesAsync(ComputingType computingType);
