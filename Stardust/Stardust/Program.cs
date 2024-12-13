@@ -36,7 +36,7 @@ builder.Services.AddSingleton(new InterSatelliteLinkConfig
 });
 builder.Services.AddSingleton(new RouterConfig
 {
-    Protocol = "a-star" // dijkstra a-star
+    Protocol = "dijkstra" // dijkstra a-star
 });
 builder.Services.AddSingleton(new ComputingConfiguration
 {

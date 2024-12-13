@@ -14,7 +14,7 @@ public class DijkstraRouter : IRouter
     public bool CanPreRouteCalc => true;
     public bool CanOnRouteCalc => true;
 
-    private static readonly Comparer<(ILink, Node, ILink, double)> comparer = Comparer<(ILink, Node, ILink, double)>.Create(static (l1, l2) => l1.Item1.Latency == l2.Item1.Latency ? 0 : l1.Item1.Latency < l2.Item1.Latency ? -1 : 1);
+    private static readonly Comparer<(ILink, Node, ILink, double)> comparer = Comparer<(ILink, Node, ILink, double)>.Create(static (l1, l2) => l1.Item4 == l2.Item4 ? 0 : l1.Item4 < l2.Item4 ? -1 : 1);
     private Dictionary<Node, (ILink OutLink, IRouteResult Route)> routes = [];
     private Dictionary<string, (ILink OutLink, IRouteResult Route)> serviceRoutes = [];
     private Node? selfNode;
@@ -44,15 +44,9 @@ public class DijkstraRouter : IRouter
             return PreRouteResult.ZeroLatencyRoute;
         }
 
-        if (!serviceRoutes.TryGetValue(targetServiceName, out (ILink OutLink, IRouteResult Result) tableEntry) || !selfNode.Established.Contains(tableEntry.OutLink))
+        if (!serviceRoutes.TryGetValue(targetServiceName, out (ILink OutLink, IRouteResult Result) tableEntry))
         {
-            var start = DateTime.UtcNow;
-            await SendAdvertismentsAsync();
-            if (!serviceRoutes.TryGetValue(targetServiceName, out tableEntry))
-            {
-                return UnreachableRouteResult.Instance;
-            }
-            return tableEntry.Result.AddCalculationDuration((int)(DateTime.UtcNow - start).TotalMilliseconds);
+            return UnreachableRouteResult.Instance;
         }
 
         return tableEntry.Result;
@@ -69,15 +63,9 @@ public class DijkstraRouter : IRouter
             return PreRouteResult.ZeroLatencyRoute;
         }
 
-        if (!routes.TryGetValue(target, out (ILink OutLink, IRouteResult Result) tableEntry) || !selfNode.Established.Contains(tableEntry.OutLink))
+        if (!routes.TryGetValue(target, out (ILink OutLink, IRouteResult Result) tableEntry))
         {
-            var start = DateTime.UtcNow;
-            await SendAdvertismentsAsync();
-            if (!routes.TryGetValue(target, out tableEntry))
-            {
-                return UnreachableRouteResult.Instance;
-            }
-            return tableEntry.Result.AddCalculationDuration((int)(DateTime.UtcNow - start).TotalMilliseconds);
+            return UnreachableRouteResult.Instance;
         }
 
         return tableEntry.Result;
