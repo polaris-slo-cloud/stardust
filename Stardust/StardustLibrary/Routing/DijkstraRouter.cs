@@ -87,7 +87,7 @@ public class DijkstraRouter : IRouter
     {
         if (selfNode == null)
         {
-            throw new MountException("Router is not mounted to a satellite.");
+            throw new MountException("Router is not mounted to a node.");
         }
 
         var routes = new Dictionary<Node, (ILink OutLink, IRouteResult Route)>();

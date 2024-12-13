@@ -56,7 +56,7 @@ public class AStarRouter(List<Node> nodes) : IRouter
         var openSet = new PriorityQueue<(Node Node, double G), double>();
         var closedSet = new HashSet<Node>();
 
-        openSet.Enqueue((selfNode, 0), target.DistanceTo(selfNode));
+        openSet.Enqueue((selfNode, 0), target.DistanceTo(selfNode) / Physics.SPEED_OF_LIGHT * 1000);
         while (openSet.Count > 0)
         {
             (Node current, double g) = openSet.Dequeue();
@@ -66,7 +66,7 @@ public class AStarRouter(List<Node> nodes) : IRouter
             }
             if (current == target)
             {
-                return Task.FromResult<IRouteResult>(new OnRouteResult((int)(g * 1000 / Physics.SPEED_OF_LIGHT), (int)(DateTime.UtcNow - start).TotalMilliseconds));
+                return Task.FromResult<IRouteResult>(new OnRouteResult((int)g, (int)(DateTime.UtcNow - start).TotalMilliseconds));
             }
 
             closedSet.Add(current);
@@ -78,8 +78,8 @@ public class AStarRouter(List<Node> nodes) : IRouter
                     continue;
                 }
 
-                double otherG = g + link.Distance;
-                openSet.Enqueue((other, otherG), target.DistanceTo(other));
+                double otherG = g + link.Latency;
+                openSet.Enqueue((other, otherG), target.DistanceTo(other) / Physics.SPEED_OF_LIGHT * 1000);
             }
         }
         return Task.FromResult<IRouteResult>(UnreachableRouteResult.Instance);

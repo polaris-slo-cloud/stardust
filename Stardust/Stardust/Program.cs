@@ -32,7 +32,7 @@ builder.Services.AddSingleton(new SimulationConfiguration
 builder.Services.AddSingleton(new InterSatelliteLinkConfig
 {
     Neighbours = 4,
-    Protocol = "mst_loop"
+    Protocol = "mst_smart_loop"
 });
 builder.Services.AddSingleton(new RouterConfig
 {
