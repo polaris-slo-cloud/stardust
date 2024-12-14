@@ -46,8 +46,7 @@ builder.Services.AddSingleton(new ComputingConfiguration
     ]
 });
 
-builder.Services.AddSingleton<SimulationService>();
-builder.Services.AddSingleton<ISimulationController, SimulationController>();
+builder.Services.AddSingleton<ISimulationController, SimulationService>();
 builder.Services.AddSingleton<SatelliteConstellationLoader>();
 builder.Services.AddSingleton<TleSatelliteConstellationLoader>();
 
@@ -58,7 +57,6 @@ builder.Services.AddSingleton<IDeploymentOrchestrator, DefaultDeploymentOrchestr
 
 builder.Services.AddTransient<ComputingBuilder>();
 
-builder.Services.AddHostedService<SimulationService>();
 builder.Services.AddHostedService<SatelliteConstellationLoaderService>();
 builder.Services.AddHostedService<StatService>();
 //builder.Services.AddHostedService<HttpService>();

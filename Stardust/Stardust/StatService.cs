@@ -18,7 +18,7 @@ internal class StatService(ISimulationController simulationController, ILogger<S
 
         var routes = new List<IRouteResult>();
 
-        await simulationController.StepAsync();
+        await simulationController.StepAsync(0);
 
         DateTime start = DateTime.Now;
         logger.LogInformation("Done with step");
@@ -41,6 +41,7 @@ internal class StatService(ISimulationController simulationController, ILogger<S
 
         var duration = DateTime.Now - start;
         logger.LogInformation("Duration {0}:{1}", duration.Minutes, duration.Seconds);
+        logger.LogInformation("Number of routes {0}", routes.Count);
         logger.LogInformation("Average of all routes {0}ms", routes.Average(r => r.Latency));
         logger.LogInformation("Median of all routes {0}ms", Median(routes).Latency);
     }

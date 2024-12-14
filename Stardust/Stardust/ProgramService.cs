@@ -26,7 +26,7 @@ internal class ProgramService(ISimulationController simulationController, ILogge
         while (!stoppingToken.IsCancellationRequested)
         {
             steps++;
-            await simulationController.StepAsync();
+            await simulationController.StepAsync(20);
             if (source.Router.CanPreRouteCalc)
             {
                 await source.Router.SendAdvertismentsAsync(); // pre routing for dijkstra

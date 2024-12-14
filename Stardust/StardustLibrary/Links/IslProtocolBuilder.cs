@@ -63,9 +63,9 @@ public class IslProtocolBuilder
         {
             lock (this)
             {
-                mstAddSmartLoopProtocol ??= new IslAddSmartLoopProtocol(OtherMstAddSmartLoopProtocol, config);
+                otherMstAddSmartLoopProtocol ??= new IslAddSmartLoopProtocol(OtherMstAddSmartLoopProtocol, config);
             }
-            return mstAddSmartLoopProtocol;
+            return otherMstAddSmartLoopProtocol;
         }
     }
 
@@ -92,7 +92,7 @@ public class IslProtocolBuilder
             MST_SMART_LOOP => new IslFilterProtocol(MstAddSmartLoopProtocol),
             OTHER_MST => new IslFilterProtocol(OtherMstProtocol),
             OTHER_MST_LOOP => new IslAddLoopProtocol(new IslFilterProtocol(OtherMstProtocol), config),
-            OTHER_MST_SMART_LOOP => new IslFilterProtocol(MstAddSmartLoopProtocol),
+            OTHER_MST_SMART_LOOP => new IslFilterProtocol(OtherMstAddSmartLoopProtocol),
             NEAREST => new IslNearestProtocol(config),
 
             _ => throw new ConfigurationException("Unknown ISL protocol.")
