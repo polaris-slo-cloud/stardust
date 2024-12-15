@@ -52,36 +52,51 @@ public class AStarRouter(List<Node> nodes) : IRouter
             throw new MountException("This router is not mounted on a node.");
         }
 
-        var start = DateTime.UtcNow;
-        var openSet = new PriorityQueue<(Node Node, double G), double>();
-        var closedSet = new HashSet<Node>();
+        var openSet = new SortedSet<(double Score, Node Node)>(
+            Comparer<(double Score, Node Node)>.Create((a, b) => a.Score != b.Score ? a.Score.CompareTo(b.Score) : a.Node.DistanceTo(target).CompareTo(b.Node.DistanceTo(target)))
+        );
+        var gScores = new Dictionary<Node, double>(); // Cost from start to the node
+        var fScores = new Dictionary<Node, double>(); // Estimated cost (g + heuristic)
 
-        openSet.Enqueue((selfNode, 0), target.DistanceTo(selfNode) / Physics.SPEED_OF_LIGHT * 1000);
+        gScores[selfNode] = 0;
+        fScores[selfNode] = selfNode.DistanceTo(target) / Physics.SPEED_OF_LIGHT * 1_000;
+        openSet.Add((fScores[selfNode], selfNode));
+
         while (openSet.Count > 0)
         {
-            (Node current, double g) = openSet.Dequeue();
-            if (closedSet.Contains(current))
+            // Get the node with the lowest fScore
+            var (currentScore, currentNode) = openSet.Min;
+            openSet.Remove((currentScore, currentNode));
+
+            if (currentNode == target)
+            {
+                return Task.FromResult<IRouteResult>(new OnRouteResult((int)gScores[target], 0));
+            }
+
+            if (currentScore > fScores[currentNode])
             {
                 continue;
             }
-            if (current == target)
-            {
-                return Task.FromResult<IRouteResult>(new OnRouteResult((int)g, (int)(DateTime.UtcNow - start).TotalMilliseconds));
-            }
 
-            closedSet.Add(current);
-            foreach (var link in current.Established)
+            foreach (var link in currentNode.Established)
             {
-                Node other = link.GetOther(current);
-                if (closedSet.Contains(other))
+                var neighbor = link.GetOther(currentNode);
+                var tentativeGScore = gScores[currentNode] + link.Latency;
+
+                if (tentativeGScore < gScores.GetValueOrDefault(neighbor, double.MaxValue))
                 {
-                    continue;
-                }
+                    // This path is better
+                    gScores[neighbor] = tentativeGScore;
+                    fScores[neighbor] = tentativeGScore + neighbor.DistanceTo(target) / Physics.SPEED_OF_LIGHT * 1_000;
 
-                double otherG = g + link.Latency;
-                openSet.Enqueue((other, otherG), target.DistanceTo(other) / Physics.SPEED_OF_LIGHT * 1000);
+                    //// Update the open set
+                    //if (openSet.Contains((fScores[neighbor], neighbor)))
+                    //    openSet.Remove((fScores[neighbor], neighbor));
+                    openSet.Add((fScores[neighbor], neighbor));
+                }
             }
         }
+
         return Task.FromResult<IRouteResult>(UnreachableRouteResult.Instance);
     }
 
