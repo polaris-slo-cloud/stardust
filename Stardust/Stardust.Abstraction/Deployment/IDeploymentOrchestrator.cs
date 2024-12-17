@@ -4,6 +4,8 @@ namespace Stardust.Abstraction.Deployment;
 
 public interface IDeploymentOrchestrator
 {
-    public Task CreateDeploymentAsync(DeploymentSpecification deployment);
-    public Task DeleteDeploymentAsync(DeploymentSpecification deployment);
+    public string[] DeploymentTypes { get; }
+
+    public Task CreateDeploymentAsync(IDeploymentSpecification deployment);
+    public Task DeleteDeploymentAsync(IDeploymentSpecification deployment);
 }

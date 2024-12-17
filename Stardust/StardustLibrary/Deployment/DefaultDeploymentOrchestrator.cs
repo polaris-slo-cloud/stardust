@@ -1,6 +1,7 @@
 ﻿using Stardust.Abstraction.Deployment;
 using Stardust.Abstraction.Node;
 using Stardust.Abstraction.Simulation;
+using StardustLibrary.Deployment.Specifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,10 @@ public class DefaultDeploymentOrchestrator(ISimulationController simulationContr
 {
     private static readonly Random random = new();
 
+    public string[] DeploymentTypes => [DefaultDeploymentSpecification.TYPE];
+
     private readonly ISimulationController simulationController = simulationController;
-    private readonly Dictionary<DeploymentSpecification, IEnumerable<Node>> deployments = [];
+    private readonly Dictionary<IDeploymentSpecification, IEnumerable<Node>> deployments = [];
 
     private List<Node>? nodes = null;
     public List<Node> Nodes {
@@ -24,10 +27,16 @@ public class DefaultDeploymentOrchestrator(ISimulationController simulationContr
         }
     }
 
-    public async Task CreateDeploymentAsync(DeploymentSpecification deployment)
+
+    public async Task CreateDeploymentAsync(IDeploymentSpecification deployment)
     {
         Shuffle();
-        var nodes = Nodes.Where(n => ((int)n.Computing.Type & (int)deployment.Type) != 0 && n.Computing.CpuAvailable >= deployment.Service.Cpu && n.Computing.MemoryAvailable >= deployment.Service.Memory).Take(deployment.Replicas);
+        if (deployment is not DefaultDeploymentSpecification deploymentSpec)
+        {
+            throw new ArgumentException("Deployment must be DefaultDeploymentSpecification", nameof(deployment));
+        }
+
+        var nodes = Nodes.Where(n => n.Computing.CpuAvailable >= deployment.Service.Cpu && n.Computing.MemoryAvailable >= deployment.Service.Memory).Take(deploymentSpec.Replicas);
         deployments.Add(deployment, nodes);
         foreach (var node in nodes)
         {
@@ -35,7 +44,7 @@ public class DefaultDeploymentOrchestrator(ISimulationController simulationContr
         }
     }
 
-    public async Task DeleteDeploymentAsync(DeploymentSpecification deployment)
+    public async Task DeleteDeploymentAsync(IDeploymentSpecification deployment)
     {
         if (!deployments.TryGetValue(deployment, out var nodes))
         {

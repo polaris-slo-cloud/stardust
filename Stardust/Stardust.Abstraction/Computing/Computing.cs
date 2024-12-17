@@ -14,7 +14,9 @@ public class Computing(double cpu, double memory, ComputingType type)
     public ComputingType Type { get; } = type;
 
     public double CpuUsage { get; private set; }
+    public double CpuUsagePercent { get => CpuUsage / Cpu; }
     public double MemoryUsage { get; private set; }
+    public double MemoryUsagePercent { get => MemoryUsage / Memory; }
 
     public double CpuAvailable => Cpu - CpuUsage;
     public double MemoryAvailable => Memory - MemoryUsage;
@@ -25,17 +27,9 @@ public class Computing(double cpu, double memory, ComputingType type)
     {
         lock (Services)
         {
-            if (service.Cpu > Cpu)
+            if (!CanPlace(service))
             {
-                throw new ApplicationException("Deployment consumes too much cpu");
-            }
-            if (service.Memory > Memory)
-            {
-                throw new ApplicationException("Deployment consumes too much memory");
-            }
-            if (Services.Contains(service))
-            {
-                throw new ApplicationException("Deployment already placed at this computing unit");
+                throw new ApplicationException("Cannot place deployment");
             }
 
             Services.Add(service);
@@ -58,6 +52,23 @@ public class Computing(double cpu, double memory, ComputingType type)
             MemoryUsage -= service.Memory;
         }
         return Task.CompletedTask;
+    }
+
+    public virtual bool CanPlace(DeployableService service)
+    {
+        if (service.Cpu > CpuAvailable)
+        {
+            return false; throw new ApplicationException("Deployment consumes too much cpu");
+        }
+        if (service.Memory > MemoryAvailable)
+        {
+            return false; throw new ApplicationException("Deployment consumes too much memory");
+        }
+        if (Services.Contains(service))
+        {
+            return false; throw new ApplicationException("Deployment already placed at this computing unit");
+        }
+        return true;
     }
 
     internal Computing Clone()

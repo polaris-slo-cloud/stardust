@@ -27,7 +27,7 @@ public class HttpService : BackgroundService
 
     public override Task StartAsync(CancellationToken cancellationToken)
     {
-        var specs = new DeploymentSpecification(new DeployableService("HttpService", 1, 1), 1, Abstraction.Computing.ComputingType.Cloud);
+        var specs = new HttpDeploymentSpecs(new DeployableService("HttpService", 1, 1));
         deploymentOrchestrator.CreateDeploymentAsync(specs);
         return base.StartAsync(cancellationToken);
     }

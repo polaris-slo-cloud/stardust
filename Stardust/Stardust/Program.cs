@@ -41,8 +41,8 @@ builder.Services.AddSingleton(new RouterConfig
 builder.Services.AddSingleton(new ComputingConfiguration
 {
     Configurations = [
-        new Computing(4, 16, ComputingType.Edge),
-        new Computing(16, 64, ComputingType.Cloud),
+        new Computing(8, 128, ComputingType.Edge),
+        new Computing(256, 1024, ComputingType.Cloud),
     ]
 });
 
@@ -54,11 +54,15 @@ builder.Services.AddSingleton<SatelliteBuilder>();
 builder.Services.AddSingleton<RouterBuilder>();
 
 builder.Services.AddSingleton<IDeploymentOrchestrator, DefaultDeploymentOrchestrator>();
+builder.Services.AddSingleton<IDeploymentOrchestrator, TaskOrchestrator>();
+builder.Services.AddSingleton<DeploymentOrchestratorResolver>();
+builder.Services.AddSingleton<DeploymentOrchestrator>();
 
 builder.Services.AddTransient<ComputingBuilder>();
 
 builder.Services.AddHostedService<SatelliteConstellationLoaderService>();
-builder.Services.AddHostedService<StatService>();
+builder.Services.AddHostedService<PaperTestService>();
+//builder.Services.AddHostedService<StatService>();
 //builder.Services.AddHostedService<HttpService>();
 //builder.Services.AddHostedService<SendRequestsService>();
 

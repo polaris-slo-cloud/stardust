@@ -35,8 +35,8 @@ internal class StatService(ISimulationController simulationController, ILogger<S
             lock (routes)
             {
                 routes.AddRange(addRoutes);
-                logger.LogInformation(source.Name);
             }
+            logger.LogInformation(source.Name);
         });
 
         var duration = DateTime.Now - start;
