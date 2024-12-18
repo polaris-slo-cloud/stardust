@@ -10,13 +10,23 @@ using System.Threading.Tasks;
 
 namespace StardustLibrary.Routing;
 
-public class AStarRouter(List<Node> nodes) : IRouter
+public class AStarRouter : IRouter
 {
     public bool CanPreRouteCalc => false;
     public bool CanOnRouteCalc => true;
 
     private Node? selfNode;
-    private readonly List<Node> nodes = nodes;
+    private List<Node> nodes = [];
+    private List<Node> Nodes { 
+        get
+        {
+            if (nodes.Count == 0 && selfNode != null)
+            {
+                nodes = GetNeighbourhood((_) => true).ToList();
+            }
+            return nodes;
+        } 
+    }
 
     public void Mount(Node node)
     {
@@ -33,7 +43,7 @@ public class AStarRouter(List<Node> nodes) : IRouter
             throw new MountException("This router is not mounted on a node.");
         }
 
-        var target = nodes.Where(n => n.Computing.Services.Any(s => s.ServiceName == targetServiceName)).OrderBy(n => n.DistanceTo(selfNode)).FirstOrDefault();
+        var target = Nodes.Where(n => n.Computing.HostsService(targetServiceName)).OrderBy(n => n.DistanceTo(selfNode)).FirstOrDefault();
         if (target == null)
         {
             return Task.FromResult<IRouteResult>(UnreachableRouteResult.Instance);
@@ -109,5 +119,34 @@ public class AStarRouter(List<Node> nodes) : IRouter
     public Task ReceiveServiceAdvertismentsAsync(string serviceName, (ILink OutLink, IRouteResult Route) advertised)
     {
         throw new NotImplementedException();
+    }
+
+    public IEnumerable<Node> GetNeighbourhood(Func<Node, bool> action)
+    {
+        if (selfNode == null)
+        {
+            throw new MountException("This router is not mounted on a node.");
+        }
+
+        var visited = new HashSet<Node>();
+        var queue = new Queue<Node>();
+
+        queue.Enqueue(selfNode);
+        while (queue.Count > 0)
+        {
+            var node = queue.Dequeue();
+            if (visited.Contains(node)) continue;
+            if (!action(node)) continue;
+
+            yield return node;
+            visited.Add(node);
+            foreach (var link in node.Established)
+            {
+                var other = link.GetOther(node);
+                if (visited.Contains(other)) continue;
+
+                queue.Enqueue(other);
+            }
+        }
     }
 }

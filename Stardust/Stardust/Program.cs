@@ -23,9 +23,9 @@ builder.Services.AddSingleton(new SimulationConfiguration
     //StepLength = 300,
     StepInterval = -1,
     StepMultiplier = 10,
-    SatelliteDataSource = "starlink_6000.tle",
+    SatelliteDataSource = "starlink_500.tle",
     SatelliteDataSourceType = "tle",
-    UsePreRouteCalc = true,
+    UsePreRouteCalc = false,
     MaxCpuCores = 30,
     SimulationStartTime = new DateTime(2024, 1, 1)
 });
@@ -36,7 +36,7 @@ builder.Services.AddSingleton(new InterSatelliteLinkConfig
 });
 builder.Services.AddSingleton(new RouterConfig
 {
-    Protocol = "dijkstra" // dijkstra a-star
+    Protocol = "a-star" // dijkstra a-star
 });
 builder.Services.AddSingleton(new ComputingConfiguration
 {

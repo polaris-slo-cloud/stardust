@@ -10,14 +10,12 @@ public class RouterBuilder(RouterConfig config)
     private const string DIJKSTRA = "dijkstra";
     private const string A_STAR = "a-star";
 
-    public List<Node> Nodes { get; set; } = [];
-
     public IRouter Build()
     {
         return config.Protocol switch
         {
             DIJKSTRA => new DijkstraRouter(),
-            A_STAR => new AStarRouter(Nodes),
+            A_STAR => new AStarRouter(),
             _ => throw new ConfigurationException("Unknown routing protocol")
         };
     }
