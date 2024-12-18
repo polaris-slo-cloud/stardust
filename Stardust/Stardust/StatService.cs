@@ -24,7 +24,7 @@ internal class StatService(ISimulationController simulationController, ILogger<S
         logger.LogInformation("Done with step");
         if (nodes.All(n => n.Router.CanPreRouteCalc))
         {
-            Parallel.ForEach(nodes, async (n) => await n.Router.SendAdvertismentsAsync());
+            Parallel.ForEach(nodes, async (n) => await n.Router.CalculateRoutingTableAsync());
             logger.LogInformation("Done with pre route calc");
         }
 
@@ -43,13 +43,6 @@ internal class StatService(ISimulationController simulationController, ILogger<S
         logger.LogInformation("Duration {0}:{1}", duration.Minutes, duration.Seconds);
         logger.LogInformation("Number of routes {0}", routes.Count);
         logger.LogInformation("Average of all routes {0}ms", routes.Average(r => r.Latency));
-        logger.LogInformation("Median of all routes {0}ms", Median(routes).Latency);
-    }
-
-    private static IRouteResult Median(IEnumerable<IRouteResult> routes) 
-    {
-        int mid = routes.Count() / 2;
-        routes = routes.OrderBy(r => r.Latency);
-        return routes.ElementAt(mid);
+        logger.LogInformation("Median of all routes {0}ms", routes.Median(r => r.Latency));
     }
 }

@@ -40,7 +40,7 @@ public class DefaultDeploymentOrchestrator(ISimulationController simulationContr
         deployments.Add(deployment, nodes);
         foreach (var node in nodes)
         {
-            await node.Computing.PlaceDeploymentAsync(deployment.Service);
+            await node.Computing.TryPlaceDeploymentAsync(deployment.Service);
         }
     }
 

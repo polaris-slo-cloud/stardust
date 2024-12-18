@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Stardust.Abstraction.Deployment;
+using Stardust.Abstraction.Exceptions;
 
 namespace Stardust.Abstraction.Computing;
 
@@ -23,20 +25,38 @@ public class Computing(double cpu, double memory, ComputingType type)
 
     public List<DeployableService> Services { get; } = [];
 
-    public virtual Task PlaceDeploymentAsync(DeployableService service)
+    private Node.Node? node;
+
+    public virtual void Mount(Node.Node node)
     {
+        if (this.node != null)
+        {
+            throw new MountException("Computing is already mounted to node");
+        }
+        this.node = node;
+    }
+
+    public virtual async Task<bool> TryPlaceDeploymentAsync(DeployableService service)
+    {
+        if (this.node == null)
+        {
+            throw new MountException("Computing must be mounted to node, before it can be used");
+        }
+
         lock (Services)
         {
             if (!CanPlace(service))
             {
-                throw new ApplicationException("Cannot place deployment");
+                return false;
             }
 
             Services.Add(service);
             CpuUsage += service.Cpu;
             MemoryUsage += service.Memory;
         }
-        return Task.CompletedTask;
+
+        await this.node.Router.AdvertiseNewServiceAsync(service.ServiceName);
+        return true;
     }
 
     public virtual Task RemoveDeploymentAsync(DeployableService service)
@@ -69,6 +89,14 @@ public class Computing(double cpu, double memory, ComputingType type)
             return false; throw new ApplicationException("Deployment already placed at this computing unit");
         }
         return true;
+    }
+
+    public virtual bool HostsService(string serviceName)
+    {
+        lock (Services)
+        {
+            return Services.Any(s => s.ServiceName == serviceName);
+        }
     }
 
     internal Computing Clone()

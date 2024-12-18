@@ -1,5 +1,6 @@
 ﻿using Stardust.Abstraction;
 using Stardust.Abstraction.Exceptions;
+using Stardust.Abstraction.Links;
 using Stardust.Abstraction.Node;
 using Stardust.Abstraction.Routing;
 using System;
@@ -23,11 +24,6 @@ public class AStarRouter(List<Node> nodes) : IRouter
             throw new MountException("This router already is mounted to a node.");
         }
         selfNode = node;
-    }
-
-    public Task ReceiveAdvertismentsAsync(RouteAdvertisment routeAdvertisment)
-    {
-        throw new NotImplementedException();
     }
 
     public Task<IRouteResult> RouteAsync(string targetServiceName, IPayload? payload = null)
@@ -100,9 +96,18 @@ public class AStarRouter(List<Node> nodes) : IRouter
         return Task.FromResult<IRouteResult>(UnreachableRouteResult.Instance);
     }
 
-    public Task SendAdvertismentsAsync()
+    public Task CalculateRoutingTableAsync()
     {
         throw new NotImplementedException();
     }
 
+    public Task AdvertiseNewServiceAsync(string serviceName)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task ReceiveServiceAdvertismentsAsync(string serviceName, (ILink OutLink, IRouteResult Route) advertised)
+    {
+        throw new NotImplementedException();
+    }
 }

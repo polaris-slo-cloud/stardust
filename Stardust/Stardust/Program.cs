@@ -25,8 +25,8 @@ builder.Services.AddSingleton(new SimulationConfiguration
     StepMultiplier = 10,
     SatelliteDataSource = "starlink_6000.tle",
     SatelliteDataSourceType = "tle",
-    UsePreRouteCalc = false,
-    MaxCpuCores = 6,
+    UsePreRouteCalc = true,
+    MaxCpuCores = 30,
     SimulationStartTime = new DateTime(2024, 1, 1)
 });
 builder.Services.AddSingleton(new InterSatelliteLinkConfig
@@ -41,8 +41,8 @@ builder.Services.AddSingleton(new RouterConfig
 builder.Services.AddSingleton(new ComputingConfiguration
 {
     Configurations = [
-        new Computing(8, 128, ComputingType.Edge),
-        new Computing(256, 1024, ComputingType.Cloud),
+        new Computing(512, 4096, ComputingType.Edge),
+        new Computing(1024, 32768, ComputingType.Cloud),
     ]
 });
 
@@ -54,14 +54,17 @@ builder.Services.AddSingleton<SatelliteBuilder>();
 builder.Services.AddSingleton<RouterBuilder>();
 
 builder.Services.AddSingleton<IDeploymentOrchestrator, DefaultDeploymentOrchestrator>();
-builder.Services.AddSingleton<IDeploymentOrchestrator, TaskOrchestrator>();
+builder.Services.AddSingleton<TaskOrchestrator>();
+builder.Services.AddSingleton<IDeploymentOrchestrator>(serviceProvider => serviceProvider.GetRequiredService<TaskOrchestrator>());
+builder.Services.AddSingleton<IDeploymentOrchestrator, WorkflowOrchestrator>();
 builder.Services.AddSingleton<DeploymentOrchestratorResolver>();
 builder.Services.AddSingleton<DeploymentOrchestrator>();
 
 builder.Services.AddTransient<ComputingBuilder>();
 
 builder.Services.AddHostedService<SatelliteConstellationLoaderService>();
-builder.Services.AddHostedService<PaperTestService>();
+builder.Services.AddHostedService<PaperWorkflowTestService>();
+//builder.Services.AddHostedService<PaperTaskTestService>();
 //builder.Services.AddHostedService<StatService>();
 //builder.Services.AddHostedService<HttpService>();
 //builder.Services.AddHostedService<SendRequestsService>();

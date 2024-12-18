@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace StardustLibrary.Routing;
 
+[Obsolete]
 internal class OspfLikeRouter : IRouter
 {
     public bool CanPreRouteCalc => true;
@@ -61,7 +62,7 @@ internal class OspfLikeRouter : IRouter
         return route.NextHop.Router.RouteAsync(target, payload);
     }
 
-    public async Task SendAdvertismentsAsync()
+    public async Task CalculateRoutingTableAsync()
     {
         if (selfNode == null)
         {
@@ -92,7 +93,7 @@ internal class OspfLikeRouter : IRouter
                 continue;
             }
 
-            await advertised.Router.ReceiveAdvertismentsAsync(new RouteAdvertisment(link, [new Route(selfNode, advertiser, latencyToAdvertised)])).ConfigureAwait(false);
+            //await advertised.Router.ReceiveServiceAdvertismentsAsync(new RouteAdvertisment(link, [new Route(selfNode, advertiser, latencyToAdvertised)])).ConfigureAwait(false);
             visited.Add(advertised);
             foreach (var addLink in advertised.Established)
             {
@@ -106,6 +107,16 @@ internal class OspfLikeRouter : IRouter
     }
 
     public Task<IRouteResult> RouteAsync(string targetServiceName, IPayload? payload)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task AdvertiseNewServiceAsync(string serviceName)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task ReceiveServiceAdvertismentsAsync(string serviceName, (ILink OutLink, IRouteResult Route) advertised)
     {
         throw new NotImplementedException();
     }

@@ -29,7 +29,7 @@ internal class ProgramService(ISimulationController simulationController, ILogge
             await simulationController.StepAsync(20);
             if (source.Router.CanPreRouteCalc)
             {
-                await source.Router.SendAdvertismentsAsync(); // pre routing for dijkstra
+                await source.Router.CalculateRoutingTableAsync(); // pre routing for dijkstra
             }
             foreach (var target in targets)
             {

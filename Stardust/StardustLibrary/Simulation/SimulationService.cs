@@ -87,7 +87,7 @@ public class SimulationService : IHostedService, ISimulationController
             // if pre routing is enabled do pre routing
             if (simulationConfiguration.UsePreRouteCalc)
             {
-                Parallel.ForEach(satellites, _parallelOptions, async (s) => await s.Router.SendAdvertismentsAsync().ConfigureAwait(false));
+                Parallel.ForEach(satellites, _parallelOptions, async (s) => await s.Router.CalculateRoutingTableAsync().ConfigureAwait(false));
                 logger.LogInformation("CalculateRoutingTableAsync after {0}ms", sw.ElapsedMilliseconds);
             }
 

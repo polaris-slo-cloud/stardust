@@ -23,6 +23,7 @@ public abstract class Node
         Computing = computing;
 
         Router.Mount(this);
+        Computing.Mount(this);
     }
 
     /// <summary>
