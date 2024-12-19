@@ -23,7 +23,7 @@ builder.Services.AddSingleton(new SimulationConfiguration
     //StepLength = 300,
     StepInterval = -1,
     StepMultiplier = 10,
-    SatelliteDataSource = "starlink_500.tle",
+    SatelliteDataSource = "starlink_newest_double.tle",
     SatelliteDataSourceType = "tle",
     UsePreRouteCalc = false,
     MaxCpuCores = 30,
