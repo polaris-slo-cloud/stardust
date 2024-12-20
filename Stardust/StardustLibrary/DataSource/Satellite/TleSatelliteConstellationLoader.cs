@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Stardust.Abstraction.DataSource;
 using Stardust.Abstraction.Links;
 using System;
@@ -19,7 +19,7 @@ public class TleSatelliteConstellationLoader : ISatelliteConstellationLoader
     private readonly SatelliteBuilder satelliteBuilder;
     private readonly ILogger<TleSatelliteConstellationLoader>? logger;
 
-    public TleSatelliteConstellationLoader(InterSatelliteLinkConfig config, SatelliteBuilder satelliteBuilder, SatelliteConstellationLoader constellationLoader, ILogger<TleSatelliteConstellationLoader>? logger = default) : this(config, satelliteBuilder, logger)
+    public TleSatelliteConstellationLoader(IOptions<InterSatelliteLinkConfig> config, SatelliteBuilder satelliteBuilder, SatelliteConstellationLoader constellationLoader, ILogger<TleSatelliteConstellationLoader>? logger = default) : this(config.Value, satelliteBuilder, logger)
     {
         constellationLoader.RegisterDataSourceLoader(DATA_SOURCE_TYPE, this);
     }

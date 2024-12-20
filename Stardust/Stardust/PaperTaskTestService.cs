@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Stardust.Abstraction.Deployment;
 using Stardust.Abstraction.Node;
 using Stardust.Abstraction.Simulation;
@@ -13,8 +14,10 @@ using System.Threading.Tasks;
 
 namespace Stardust;
 
-public class PaperTaskTestService(ISimulationController simulationController, SimulationConfiguration configuration, DeploymentOrchestrator orchestrator, ILogger<PaperTaskTestService> logger) : BackgroundService
+public class PaperTaskTestService(ISimulationController simulationController, IOptions<SimulationConfiguration> configuration, DeploymentOrchestrator orchestrator, ILogger<PaperTaskTestService> logger) : BackgroundService
 {
+    private readonly SimulationConfiguration configuration = configuration.Value;
+
     private const int NUM_SPECS = 25_000/10;
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)

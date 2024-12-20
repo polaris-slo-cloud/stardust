@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Stardust.Abstraction.Computing;
 using Stardust.Abstraction.Node;
 using Stardust.Abstraction.Simulation;
@@ -36,20 +37,20 @@ public class SimulationService : IHostedService, ISimulationController
     public bool Autorun { get; private set; }
     public DateTime StartTime { get; }
 
-    public SimulationService(SimulationConfiguration simulationConfiguration, SatelliteConstellationLoader constellationLoader, RouterBuilder routerBuilder, ComputingBuilder computingBuilder, ILogger<SimulationService> logger)
+    public SimulationService(IOptions<SimulationConfiguration> simulationConfiguration, SatelliteConstellationLoader constellationLoader, RouterBuilder routerBuilder, ComputingBuilder computingBuilder, ILogger<SimulationService> logger)
     {
-        this.simulationConfiguration = simulationConfiguration;
+        this.simulationConfiguration = simulationConfiguration.Value;
         this.constellationLoader = constellationLoader;
         this.routerBuilder = routerBuilder;
         this.computingBuilder = computingBuilder;
         this.logger = logger;
         this._parallelOptions = new ParallelOptions()
         {
-            MaxDegreeOfParallelism = simulationConfiguration.MaxCpuCores,
+            MaxDegreeOfParallelism = this.simulationConfiguration.MaxCpuCores,
         };
 
-        this.Autorun = simulationConfiguration.StepInterval >= 0;
-        this.StartTime = simTime = simulationConfiguration.SimulationStartTime;
+        this.Autorun = this.simulationConfiguration.StepInterval >= 0;
+        this.StartTime = simTime = this.simulationConfiguration.SimulationStartTime;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Stardust;
 using Stardust.Abstraction.Computing;
@@ -11,33 +12,16 @@ using StardustLibrary.DataSource.Satellite;
 using StardustLibrary.Deployment;
 using StardustLibrary.Routing;
 using StardustLibrary.Simulation;
-using System;
+using System.Collections.Generic;
 
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-// TODO load config from config file
-builder.Services.AddSingleton(new SimulationConfiguration
-{
-    //StepInterval = 30,
-    //StepLength = 300,
-    StepInterval = -1,
-    StepMultiplier = 10,
-    SatelliteDataSource = "starlink_newest_double.tle",
-    SatelliteDataSourceType = "tle",
-    UsePreRouteCalc = false,
-    MaxCpuCores = 30,
-    SimulationStartTime = new DateTime(2024, 1, 1)
-});
-builder.Services.AddSingleton(new InterSatelliteLinkConfig
-{
-    Neighbours = 4,
-    Protocol = "mst_smart_loop"
-});
-builder.Services.AddSingleton(new RouterConfig
-{
-    Protocol = "a-star" // dijkstra a-star
-});
+builder.Configuration.AddJsonFile("appsettings.json");
+
+builder.Services.Configure<SimulationConfiguration>(builder.Configuration.GetSection("SimulationConfiguration"));
+builder.Services.Configure<InterSatelliteLinkConfig>(builder.Configuration.GetSection("InterSatelliteLinkConfig"));
+builder.Services.Configure<RouterConfig>(builder.Configuration.GetSection("RouterConfig"));
 builder.Services.AddSingleton(new ComputingConfiguration
 {
     Configurations = [

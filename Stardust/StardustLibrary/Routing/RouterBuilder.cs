@@ -1,14 +1,15 @@
-﻿using Stardust.Abstraction.Exceptions;
-using Stardust.Abstraction.Node;
+﻿using Microsoft.Extensions.Options;
+using Stardust.Abstraction.Exceptions;
 using Stardust.Abstraction.Routing;
-using System.Collections.Generic;
 
 namespace StardustLibrary.Routing;
 
-public class RouterBuilder(RouterConfig config)
+public class RouterBuilder(IOptions<RouterConfig> config)
 {
     private const string DIJKSTRA = "dijkstra";
     private const string A_STAR = "a-star";
+
+    private readonly RouterConfig config = config.Value;
 
     public IRouter Build()
     {

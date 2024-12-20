@@ -10,10 +10,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using StardustLibrary.Simulation;
 using System.Linq;
+using Microsoft.Extensions.Options;
 namespace Stardust;
 
-public class PaperWorkflowTestService(ISimulationController simulationController, SimulationConfiguration configuration, DeploymentOrchestrator orchestrator, ILogger<PaperWorkflowTestService> logger) : BackgroundService
+public class PaperWorkflowTestService(ISimulationController simulationController, IOptions<SimulationConfiguration> configuration, DeploymentOrchestrator orchestrator, ILogger<PaperWorkflowTestService> logger) : BackgroundService
 {
+    private readonly SimulationConfiguration configuration = configuration.Value;
+
     private const int NUM_SPECS = 5_000;
     private const int MAX_NUM_TASKS = 5;
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -39,21 +42,30 @@ public class PaperWorkflowTestService(ISimulationController simulationController
                         routeCalc.Add(node);
                     }
 
+#if true
+                    List<TaskSpecification> tasks = [
+                        new (node, 175d, new DeployableService($"object-det-{i}", 4, 2)),
+                        new ($"object-det-{i}", 150d, new DeployableService($"extract-frames-{i}", 4, 2)),
+                        new ($"extract-frames-{i}", 100d, new DeployableService($"ingest-{i}", 1, 2)),
+                        new ($"object-det-{i}", 100d, new DeployableService($"prepare-ds-{i}", 4, 4))
+                        ];
+#else
                     int numTasks = r.Next(2, MAX_NUM_TASKS);
                     List<TaskSpecification> tasks = [
                         new TaskSpecification(node, r.Next(30, 100), new DeployableService($"WorkflowTask{i.ToString().PadLeft(5, '0')}{0.ToString().PadLeft(5, '0')}", r.Next(1, 16), r.Next(2, 32)))
                     ];
                     for (int j = 1; j < numTasks; j++)
                     {
-                        tasks.Add(new($"WorkflowTask{i.ToString().PadLeft(5, '0')}{(j-1).ToString().PadLeft(5, '0')}", r.Next(30, 100), new DeployableService($"WorkflowTask{i.ToString().PadLeft(5, '0')}{j.ToString().PadLeft(5, '0')}", r.Next(1, 16), r.Next(2, 32))));
+                        tasks.Add(new($"WorkflowTask{i.ToString().PadLeft(5, '0')}{(j - 1).ToString().PadLeft(5, '0')}", r.Next(30, 100), new DeployableService($"WorkflowTask{i.ToString().PadLeft(5, '0')}{j.ToString().PadLeft(5, '0')}", r.Next(1, 16), r.Next(2, 32))));
                     }
+#endif
                     specifications.Add(new WorkflowSpecification($"Workflow{i}", tasks));
                 }
 
                 Parallel.ForEach(specifications, async s =>
                 {
                     await orchestrator.CreateDeploymentAsync(s);
-                    logger.LogInformation(s.Name);
+                    //logger.LogInformation(s.Name);
                 });
 
                 var duration = (DateTime.Now - start).TotalSeconds;
