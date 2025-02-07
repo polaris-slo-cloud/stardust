@@ -5,12 +5,14 @@ namespace Stardust.Abstraction.Links;
 
 public class GroundLink : ILink
 {
+    private const double SPEED = Physics.SPEED_OF_LIGHT * 0.98;
+
     public GroundStation GroundStation { get; set; }
     public Satellite Satellite { get; set; }
 
     public double Distance { get => GroundStation.DistanceTo(Satellite); }
 
-    public double Latency { get => Distance / Physics.SPEED_OF_LIGHT * 1_000; }
+    public double Latency { get => Distance / SPEED * 1_000; }
 
     public double Bandwidth { get; } = 500_000_000; // 500Mbit static for now
 
@@ -36,5 +38,10 @@ public class GroundLink : ILink
         }
 
         throw new ApplicationException("This ground station is not referenced with this link");
+    }
+
+    public bool IsReachable()
+    {
+        return true;
     }
 }

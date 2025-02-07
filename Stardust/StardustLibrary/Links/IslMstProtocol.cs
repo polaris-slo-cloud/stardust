@@ -100,7 +100,10 @@ public class IslMstProtocol : IInterSatelliteLinkProtocol
         var mstVertices = new List<IslLink>(this.established.Capacity);
         var representatives = this.representatives.ToDictionary();
 
-        var links = Links.Select(l => (l.Distance, l)).Where(i => i.Distance <= Physics.MAX_ISL_DISTANCE).ToList();
+        var links = Links
+            .Select(l => (l.Distance, l))
+            .Where(i => i.Distance <= Physics.MAX_ISL_DISTANCE)
+            .ToList();
         var priorityQueue = new PriorityQueue<IslLink, double>(links.Count);
         foreach (var (Distance, l) in links)
         {
@@ -114,7 +117,7 @@ public class IslMstProtocol : IInterSatelliteLinkProtocol
 
             var rep1 = GetRepresentative(representatives, current.Satellite1);
             var rep2 = GetRepresentative(representatives, current.Satellite2);
-            if (rep1 == rep2)
+            if (rep1 == rep2 || !current.IsReachable())
             {
                 continue;
             }

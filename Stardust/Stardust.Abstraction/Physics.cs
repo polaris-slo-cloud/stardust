@@ -12,7 +12,7 @@ public static class Physics
     /// <summary>
     /// Earth's radius in meters
     /// </summary>
-    public const double EARTH_RADIUS = 6_371_000;
+    public const double EARTH_RADIUS = 6_378_000;
 
     /// <summary>
     /// Earth's rotation speed in radians per second (2π / 86400 radians/second)
@@ -22,7 +22,7 @@ public static class Physics
     /// <summary>
     /// Maximal distance for two satellites to communicate in m.
     /// </summary>
-    public const double MAX_ISL_DISTANCE = 5_000_000;
+    public const double MAX_ISL_DISTANCE = EARTH_RADIUS / 3;
 
     /// <summary>
     /// Speed of light in m/s.

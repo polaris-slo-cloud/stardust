@@ -72,8 +72,9 @@ public class IslNearestProtocol : IInterSatelliteLinkProtocol
             }
 
             var prevOut = outgoing;
-            outgoing = Links.OrderBy(l => l.Distance)
-                .TakeWhile(l => l.Distance <= Physics.MAX_ISL_DISTANCE)
+            outgoing = Links
+                .Where(l => l!= null && l.IsReachable())
+                .OrderBy(l => l.Distance)
                 .Take(config.Neighbours)
                 .ToList();
 

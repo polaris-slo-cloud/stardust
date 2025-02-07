@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Stardust.Abstraction\Stardust.Abstraction.csproj" />
+    <ProjectReference Include="..\StardustLibrary\StardustLibrary.csproj" />
   </ItemGroup>
 
 </Project>

@@ -37,9 +37,16 @@
     <None Update="starlink_6000.tle">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="starlink_newest.tle">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="starlink_newest_double.tle">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="fz3-17389178117090\" />
   </ItemGroup>
 
 </Project>

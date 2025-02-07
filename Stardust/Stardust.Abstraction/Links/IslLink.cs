@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Xml.Linq;
 using Stardust.Abstraction.Node;
 
 namespace Stardust.Abstraction.Links;
 
 public class IslLink : ILink
 {
+    private const double SPEED = Physics.SPEED_OF_LIGHT * 0.99;
     public Satellite Satellite1 { get; }
     public Satellite Satellite2 { get; }
 
@@ -20,7 +22,7 @@ public class IslLink : ILink
     {
         get
         {
-            return Distance / Physics.SPEED_OF_LIGHT * 1_000;
+            return Distance / SPEED * 1_000;
         }
     }
 
@@ -65,5 +67,13 @@ public class IslLink : ILink
         }
 
         throw new ApplicationException("This node is not referenced with this link");
+    }
+
+    public bool IsReachable()
+    {
+        var v = Satellite2.Position - Satellite1.Position;
+        var cross = v.CrossProduct(Satellite1.Position);
+        var d = cross.Abs() / v.Abs();
+        return d > Physics.EARTH_RADIUS + 10_000;
     }
 }

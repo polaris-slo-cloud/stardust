@@ -16,9 +16,24 @@ public struct Vector
         Z = z;
     }
 
+    public readonly double Abs()
+    {
+        return Math.Sqrt(X * X + Y * Y + Z * Z);
+    }
+
     public readonly double Dot(Vector v)
     {
         return this.X * v.X + this.Y * v.Y + this.Z * v.Z;
+    }
+
+    public readonly Vector CrossProduct(Vector other)
+    {
+        return new Vector()
+        {
+            X = this.Y * other.Z - this.Z * other.X,
+            Y = this.Z * other.X - this.X * other.Y,
+            Z = this.X * other.Y - this.Y * other.Z,
+        };
     }
 
     public readonly Vector Normalize()

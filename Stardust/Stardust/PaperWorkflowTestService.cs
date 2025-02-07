@@ -36,11 +36,11 @@ public class PaperWorkflowTestService(ISimulationController simulationController
                 Node node = nodes[r.Next(nodes.Count)];
                 for (int i = 0; i < NUM_SPECS; i++)
                 {
-                    if (node.Router.CanPreRouteCalc && !configuration.UsePreRouteCalc && !routeCalc.Contains(node))
-                    {
-                        await node.Router.CalculateRoutingTableAsync();
-                        routeCalc.Add(node);
-                    }
+                    //if (node.Router.CanPreRouteCalc && !configuration.UsePreRouteCalc && !routeCalc.Contains(node))
+                    //{
+                    //    await node.Router.CalculateRoutingTableAsync();
+                    //    routeCalc.Add(node);
+                    //}
 
 #if true
                     List<TaskSpecification> tasks = [

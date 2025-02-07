@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Stardust.Abstraction.Simulation;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
@@ -7,19 +8,20 @@ using System.Threading.Tasks;
 
 namespace Stardust.HttpService;
 
-public class SendRequestsService(ILogger<SendRequestsService> logger) : BackgroundService
+public class SendRequestsService(ISimulationController simulationController, ILogger<SendRequestsService> logger) : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.Factory.StartNew(async () =>
         {
+            await simulationController.StepAsync(0);
 
             var sw = Stopwatch.StartNew();
             using var client = new HttpClient()
             {
                 BaseAddress = new System.Uri("http://localhost:8081")
             };
-            client.DefaultRequestHeaders.Add("fromNode", "Vienna");
+            client.DefaultRequestHeaders.Add("fromNode", "Sydney");
             while (!stoppingToken.IsCancellationRequested)
             {
                 sw.Restart();

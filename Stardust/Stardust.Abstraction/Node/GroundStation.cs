@@ -40,18 +40,36 @@ public class GroundStation : Node
         await GroundSatelliteLinkProtocol.UpdateLink();
     }
 
-    // Convert ground station's latitude and longitude to 3D Earth-centered coordinates
+    // Calculate 3D Earth-centered coordinates from ground station's latitude and longitude
     public void UpdatePosition(double timeElapsed)
     {
-        // Longitude changes due to Earth's rotation
-        double longitudeRad = Longitude.DegToRad() + timeElapsed * Physics.EARTH_ROTATION_SPEED;
-        double latitudeRad = Latitude.DegToRad();
+        double alt = 0; // altitude can be added later
 
-        double x = Physics.EARTH_RADIUS * Math.Cos(latitudeRad) * Math.Cos(longitudeRad);
-        double y = Physics.EARTH_RADIUS * Math.Cos(latitudeRad) * Math.Sin(longitudeRad);
-        double z = Physics.EARTH_RADIUS * Math.Sin(latitudeRad);
+        // WGS84 ellipsoid constants
+        double a = 6378137.0;          // semi-major axis in meters
+        double b = 6356752.314245;     // semi-minor axis in meters
+        double e2 = 1 - (b * b) / (a * a); // first eccentricity squared
 
-        Position = new Vector(x, y, z);
+        // Convert degrees to radians
+        double latRad = Latitude.DegToRad();
+        double lonRad = Longitude.DegToRad();
+
+        // Calculate prime vertical radius of curvature
+        double N = a / Math.Sqrt(1 - e2 * Math.Sin(lonRad) * Math.Sin(lonRad));
+
+
+        // Calculate ECEF coordinates
+        double x = (N + alt) * Math.Cos(lonRad) * Math.Cos(latRad);
+        double y = (N + alt) * Math.Cos(lonRad) * Math.Sin(latRad);
+        double z = (b * b / (a * a) * N + alt) * Math.Sin(lonRad);
+
+        // Calculate rotation (assume no titled earth axis)
+        double theta = Physics.EARTH_ROTATION_SPEED * timeElapsed;
+        double xRotated = x * Math.Cos(theta) - y * Math.Sin(theta);
+        double yRotated = x * Math.Sin(theta) + y * Math.Cos(theta);
+        double zRotated = z;
+
+        Position = new Vector(xRotated, yRotated, zRotated);
     }
 
     // Calculate the distance to a satellite

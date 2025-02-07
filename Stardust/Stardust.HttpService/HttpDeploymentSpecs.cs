@@ -1,11 +1,11 @@
 ﻿using Stardust.Abstraction.Deployment;
+using StardustLibrary.Deployment.Specifications;
 
 namespace Stardust.HttpService;
 
-public class HttpDeploymentSpecs(DeployableService service) : IDeploymentSpecification 
+public class HttpDeploymentSpecs : DefaultDeploymentSpecification
 {
-    public const string TYPE = "http";
-    public string Type => TYPE;
-
-    public DeployableService Service { get; } = service;
+    public HttpDeploymentSpecs(DeployableService service) : base(service, 1)
+    {
+    }
 }

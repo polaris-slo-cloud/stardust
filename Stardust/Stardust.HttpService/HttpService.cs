@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Stardust.Abstraction.Deployment;
 using Stardust.Abstraction.Routing;
 using Stardust.Abstraction.Simulation;
+using StardustLibrary.Deployment.Specifications;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,10 +16,10 @@ namespace Stardust.HttpService;
 public class HttpService : BackgroundService
 {
     private readonly ISimulationController simulationController;
-    private readonly IDeploymentOrchestrator deploymentOrchestrator;
+    private readonly DeploymentOrchestrator deploymentOrchestrator;
     private readonly ILogger<HttpService> logger;
 
-    public HttpService(ISimulationController simulationController, IDeploymentOrchestrator deploymentOrchestrator, ILogger<HttpService> logger)
+    public HttpService(ISimulationController simulationController, DeploymentOrchestrator deploymentOrchestrator, ILogger<HttpService> logger)
     {
         this.simulationController = simulationController;
         this.deploymentOrchestrator = deploymentOrchestrator;
@@ -27,8 +28,8 @@ public class HttpService : BackgroundService
 
     public override Task StartAsync(CancellationToken cancellationToken)
     {
-        var specs = new HttpDeploymentSpecs(new DeployableService("HttpService", 1, 1));
-        deploymentOrchestrator.CreateDeploymentAsync(specs);
+        var specs = new DefaultDeploymentSpecification(new DeployableService("HttpService", 1, 1), 1);
+        deploymentOrchestrator.CreateDeploymentAsync(specs).Wait();
         return base.StartAsync(cancellationToken);
     }
 
@@ -98,7 +99,7 @@ public class HttpService : BackgroundService
 
                     await routeResult.WaitLatencyAsync();
 
-                    using var httpResponse = await client.GetAsync($"https://www.cloudflare.com{request.Url?.AbsolutePath ?? string.Empty}", stoppingToken);
+                    using var httpResponse = await client.GetAsync($"http://httpforever.com{request.Url?.AbsolutePath ?? string.Empty}", stoppingToken);
                     using var responseStream = await httpResponse.Content.ReadAsStreamAsync(stoppingToken);
 
                     response.ContentType = httpResponse.Content.Headers.ContentType?.MediaType ?? "text";

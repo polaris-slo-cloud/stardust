@@ -22,4 +22,6 @@ public interface ILink
     public bool Established { get; }
 
     public Node.Node GetOther(Node.Node self);
+
+    public bool IsReachable();
 }
