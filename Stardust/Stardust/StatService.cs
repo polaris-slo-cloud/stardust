@@ -56,11 +56,18 @@ internal class StatService(ISimulationController simulationController, ILogger<S
         foreach (var node in groundNodes)
         {
             var route = await vienna.Router.RouteAsync(node);
-            var back = await node.Router.RouteAsync(vienna);
             routes.Add(route);
-            string[] interest = ["Graz", "Paris", "London", "Johannesburg", "Bogota", "New York", "Los Angeles", "Singapore", "Sydney", "Melbourne", "Dili"];
-            if (interest.Contains(node.Name)) 
-                logger.LogInformation($"Route to {node.Name}: {2 * route.Latency}ms");
+            string[] interest = ["Graz", "Paris", "London", "Johannesburg", "Bogota", "New York", "Los Angeles", "Singapore", "Sydney"];
+            if (interest.Contains(node.Name))
+            {
+                if (!route.Reachable)
+                {
+                    logger.LogWarning($"{node.Name} not reachable");
+                } else
+                {
+                    logger.LogInformation($"Route to {node.Name}: {2 * route.Latency}ms");
+                }
+            }
         }
 
         duration = DateTime.Now - start;

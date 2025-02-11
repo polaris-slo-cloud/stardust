@@ -8,6 +8,7 @@ public class IslProtocolBuilder
 {
     private const string NEAREST = "nearest";
     private const string MST = "mst";
+    private const string PMST = "pmst";
     private const string MST_LOOP = "mst_loop";
     private const string MST_SMART_LOOP = "mst_smart_loop";
     private const string OTHER_MST = "other_mst";
@@ -27,6 +28,19 @@ public class IslProtocolBuilder
                 mstProtocol ??= new IslMstProtocol();
             }
             return mstProtocol;
+        }
+    }
+
+    private IslParallelMstProtocol? pmstProtocol;
+    private IslParallelMstProtocol PMstProtocol
+    {
+        get
+        {
+            lock (this)
+            {
+                pmstProtocol ??= new IslParallelMstProtocol();
+            }
+            return pmstProtocol;
         }
     }
 
@@ -88,6 +102,7 @@ public class IslProtocolBuilder
         return config.Protocol switch
         {
             MST => new IslFilterProtocol(MstProtocol),
+            PMST => new IslFilterProtocol(PMstProtocol),
             MST_LOOP => new IslAddLoopProtocol(new IslFilterProtocol(MstProtocol), config),
             MST_SMART_LOOP => new IslFilterProtocol(MstAddSmartLoopProtocol),
             OTHER_MST => new IslFilterProtocol(OtherMstProtocol),
