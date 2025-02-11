@@ -75,5 +75,6 @@ internal class StatService(ISimulationController simulationController, ILogger<S
         logger.LogInformation("Number of routes {0}", routes.Count);
         logger.LogInformation("Average of all routes {0}ms", routes.Average(r => r.Latency));
         logger.LogInformation("Median of all routes {0}ms", routes.Median(r => r.Latency));
+        Environment.Exit(0);
     }
 }
