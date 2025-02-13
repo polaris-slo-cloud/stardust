@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Stardust.Abstraction.Routing;
 using System.Linq;
 using Stardust.Abstraction.Node;
+using Stardust.Abstraction.Links;
 namespace Stardust;
 
 internal class StatService(ISimulationController simulationController, ILogger<StatService> logger) : BackgroundService
@@ -17,6 +18,7 @@ internal class StatService(ISimulationController simulationController, ILogger<S
         var random = new Random();
         var nodes = await simulationController.GetAllNodesAsync();
         var groundNodes = await simulationController.GetAllNodesAsync<GroundStation>();
+        var satellites = await simulationController.GetAllNodesAsync<Satellite>();
 
         logger.LogInformation("{0}", groundNodes.Count);
 
@@ -75,6 +77,9 @@ internal class StatService(ISimulationController simulationController, ILogger<S
         logger.LogInformation("Number of routes {0}", routes.Count);
         logger.LogInformation("Average of all routes {0}ms", routes.Average(r => r.Latency));
         logger.LogInformation("Median of all routes {0}ms", routes.Median(r => r.Latency));
+
+        logger.LogInformation($"More than four ISL: {satellites.Where(s => s.InterSatelliteLinkProtocol.Established.Where(l => l.GetType() == typeof(IslLink)).Count() > 4).Count()}");
+        logger.LogInformation($"ISL counts: {string.Concat(satellites.Select(s => s.InterSatelliteLinkProtocol.Established.Where(l => l.GetType() == typeof(IslLink)).Count()).Select(i => i + " "))}");
         Environment.Exit(0);
     }
 }

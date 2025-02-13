@@ -8,9 +8,11 @@ public class IslProtocolBuilder
 {
     private const string NEAREST = "nearest";
     private const string MST = "mst";
-    private const string PMST = "pmst";
+    private const string PST = "pst";
     private const string MST_LOOP = "mst_loop";
+    private const string PST_LOOP = "pst_loop";
     private const string MST_SMART_LOOP = "mst_smart_loop";
+    private const string PST_SMART_LOOP = "pst_smart_loop";
     private const string OTHER_MST = "other_mst";
     private const string OTHER_MST_LOOP = "other_mst_loop";
     private const string OTHER_MST_SMART_LOOP = "other_mst_smart_loop";
@@ -31,16 +33,16 @@ public class IslProtocolBuilder
         }
     }
 
-    private IslParallelMstProtocol? pmstProtocol;
-    private IslParallelMstProtocol PMstProtocol
+    private IslPstProtocol? pstProtocol;
+    private IslPstProtocol PstProtocol
     {
         get
         {
             lock (this)
             {
-                pmstProtocol ??= new IslParallelMstProtocol();
+                pstProtocol ??= new IslPstProtocol();
             }
-            return pmstProtocol;
+            return pstProtocol;
         }
     }
 
@@ -65,6 +67,20 @@ public class IslProtocolBuilder
             lock (this)
             {
                 mstAddSmartLoopProtocol ??= new IslAddSmartLoopProtocol(MstProtocol, config);
+            }
+            return mstAddSmartLoopProtocol;
+        }
+    }
+
+
+    private IslAddSmartLoopProtocol? pstAddSmartLoopProtocol;
+    private IslAddSmartLoopProtocol PstAddSmartLoopProtocol
+    {
+        get
+        {
+            lock (this)
+            {
+                mstAddSmartLoopProtocol ??= new IslAddSmartLoopProtocol(PstProtocol, config);
             }
             return mstAddSmartLoopProtocol;
         }
@@ -102,9 +118,11 @@ public class IslProtocolBuilder
         return config.Protocol switch
         {
             MST => new IslFilterProtocol(MstProtocol),
-            PMST => new IslFilterProtocol(PMstProtocol),
+            PST => new IslFilterProtocol(PstProtocol),
             MST_LOOP => new IslAddLoopProtocol(new IslFilterProtocol(MstProtocol), config),
+            PST_LOOP => new IslAddLoopProtocol(new IslFilterProtocol(PstProtocol), config),
             MST_SMART_LOOP => new IslFilterProtocol(MstAddSmartLoopProtocol),
+            PST_SMART_LOOP => new IslFilterProtocol(PstAddSmartLoopProtocol),
             OTHER_MST => new IslFilterProtocol(OtherMstProtocol),
             OTHER_MST_LOOP => new IslAddLoopProtocol(new IslFilterProtocol(OtherMstProtocol), config),
             OTHER_MST_SMART_LOOP => new IslFilterProtocol(OtherMstAddSmartLoopProtocol),

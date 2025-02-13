@@ -47,9 +47,9 @@ builder.Services.AddSingleton<DeploymentOrchestrator>();
 builder.Services.AddTransient<ComputingBuilder>();
 
 builder.Services.AddHostedService<SatelliteConstellationLoaderService>();
-//builder.Services.AddHostedService<PaperWorkflowTestService>();
+builder.Services.AddHostedService<PaperWorkflowTestService>();
 //builder.Services.AddHostedService<PaperTaskTestService>();
-builder.Services.AddHostedService<StatService>();
+//builder.Services.AddHostedService<StatService>();
 //builder.Services.AddHostedService<HttpService>();
 //builder.Services.AddHostedService<SendRequestsService>();
 

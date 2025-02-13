@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace StardustLibrary.Links;
 
-public class IslParallelMstProtocol : IInterSatelliteLinkProtocol
+public class IslPstProtocol : IInterSatelliteLinkProtocol
 {
     private readonly HashSet<IslLink> setLink = new(2 ^ 22);
     public ICollection<IslLink> Links { get 
@@ -98,6 +98,8 @@ public class IslParallelMstProtocol : IInterSatelliteLinkProtocol
             this.representatives = satellites.ToDictionary(s => s, s => s);
         }
 
+        int maxLinks = 4;
+        int count = 0;
         var representatives = this.representatives.ToDictionary();
         var nodes = new Dictionary<Satellite, int>();
         var mstVertices = new HashSet<IslLink>();
@@ -110,15 +112,13 @@ public class IslParallelMstProtocol : IInterSatelliteLinkProtocol
             {
                 var satellite = satellites[range.Item1 + i];
                 var minLink = links[i] = satellite.InterSatelliteLinkProtocol.Links
+                    .Where(l => l.IsReachable())
                     .OrderBy(l => l.Latency)
-                    .Where(l => l.IsReachable() && GetRepresentative(representatives, satellite) != GetRepresentative(representatives, l.GetOther(satellite)) && nodes.GetValueOrDefault(l.GetOther(satellite)) < 4)
+                    .Where(l =>
+                        GetRepresentative(representatives, satellite) != GetRepresentative(representatives, l.GetOther(satellite)) && 
+                        nodes.GetValueOrDefault(l.GetOther(satellite)) < maxLinks && 
+                        nodes.GetValueOrDefault(satellite) < maxLinks)
                     .ToList();
-
-                //localLinks[i] = minLink;
-                //lock (mstVertices)
-                //{
-                //    mstVertices.Add(minLink);
-                //}
             }
 
             lock (mstVertices)
@@ -132,16 +132,21 @@ public class IslParallelMstProtocol : IInterSatelliteLinkProtocol
                         var other = l.GetOther(satellite);
                         var rep1 = GetRepresentative(representatives, satellite);
                         var rep2 = GetRepresentative(representatives, other);
+                        var count1 = nodes.GetValueOrDefault(satellite);
+                        var count2 = nodes.GetValueOrDefault(other);
                         if (rep1 == rep2
-                            || nodes.GetValueOrDefault(other) >= 4 
-                            || nodes.GetValueOrDefault(satellite) >= 4)
+                            || count1 >= maxLinks
+                            || count2 >= maxLinks)
                         {
                             continue;
                         }
-                        mstVertices.Add(l);
+                        nodes[satellite] = count1 + 1;
+                        nodes[other] = count2 + 1;
                         representatives[rep2] = rep1;
                         representatives[other] = rep1;
                         representatives[satellite] = rep1;
+                        count++;
+                        mstVertices.Add(l);
                         break;
                     }
                 }
@@ -150,7 +155,7 @@ public class IslParallelMstProtocol : IInterSatelliteLinkProtocol
             Debug.WriteLine($"From {range.Item1} to {range.Item2} with length {localLinks.Length} but {localLinks.Count(l => l!= null)}");
         });
 
-        Debug.WriteLine($"MST: {mstVertices.Count}");
+        Debug.WriteLine($"MST: {mstVertices.Count} {count}");
 
         var established = this.established.ToList();
         foreach (var link in mstVertices)
