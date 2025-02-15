@@ -99,31 +99,30 @@ public class IslPstProtocol : IInterSatelliteLinkProtocol
         }
 
         int maxLinks = 4;
-        int count = 0;
         var representatives = this.representatives.ToDictionary();
         var nodes = new Dictionary<Satellite, int>();
         var mstVertices = new HashSet<IslLink>();
         var partitioner = Partitioner.Create(0, satellites.Count);
         Parallel.ForEach(partitioner, (range, state) =>
         {
-            IslLink[] localLinks = new IslLink[range.Item2-range.Item1];
-            List<IslLink>[] links = new List<IslLink>[localLinks.Length];
-            for (int i = 0; i < localLinks.Length; i++) 
+            List<IslLink>[] links = new List<IslLink>[range.Item2 - range.Item1];
+            for (int i = 0; i < links.Length; i++) 
             {
                 var satellite = satellites[range.Item1 + i];
+                var representative = GetRepresentative(representatives, satellite);
                 var minLink = links[i] = satellite.InterSatelliteLinkProtocol.Links
-                    .Where(l => l.IsReachable())
+                    .Where(l => 
+                        l.IsReachable() && 
+                        representative != GetRepresentative(representatives, l.GetOther(satellite)))
+                    //.Where(l => nodes.GetValueOrDefault(l.GetOther(satellite)) < maxLinks)
+                    //.Where(l => nodes.GetValueOrDefault(satellite) < maxLinks)
                     .OrderBy(l => l.Latency)
-                    .Where(l =>
-                        GetRepresentative(representatives, satellite) != GetRepresentative(representatives, l.GetOther(satellite)) && 
-                        nodes.GetValueOrDefault(l.GetOther(satellite)) < maxLinks && 
-                        nodes.GetValueOrDefault(satellite) < maxLinks)
                     .ToList();
             }
 
             lock (mstVertices)
             {
-                for (int i = 0; i < localLinks.Length; i++)
+                for (int i = 0; i < links.Length; i++)
                 {
                     var list = links[i];
                     var satellite = satellites[range.Item1 + i];
@@ -145,7 +144,6 @@ public class IslPstProtocol : IInterSatelliteLinkProtocol
                         representatives[rep2] = rep1;
                         representatives[other] = rep1;
                         representatives[satellite] = rep1;
-                        count++;
                         mstVertices.Add(l);
                         break;
                     }
