@@ -43,8 +43,17 @@ public class GroundSatelliteNearestProtocol : IGroundSatelliteLinkProtocol
 
         var old = Link;
         Link = new GroundLink(groundStation, uplinkSat);
-        uplinkSat.GroundLinks.Add(Link);
-        old?.Satellite.GroundLinks.RemoveAll(l => l.GroundStation == groundStation);
+        lock (uplinkSat.GroundLinks)
+        {
+            uplinkSat.GroundLinks.Add(Link);
+        }
+        if (old != null)
+        {
+            lock (old.Satellite.GroundLinks)
+            {
+                old.Satellite.GroundLinks.RemoveAll(l => l.GroundStation == groundStation);
+            }
+        }
 
         return Task.CompletedTask;
     }

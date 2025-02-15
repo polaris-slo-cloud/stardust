@@ -91,23 +91,6 @@ public class SimulationService : IHostedService, ISimulationController
                 Parallel.ForEach(satellites, _parallelOptions, async (s) => await s.Router.CalculateRoutingTableAsync().ConfigureAwait(false));
                 logger.LogInformation("CalculateRoutingTableAsync after {0}ms", sw.ElapsedMilliseconds);
             }
-
-            if (Autorun && sw.Elapsed.Seconds < simulationConfiguration.StepInterval)
-            {
-                int wait = (int)((simulationConfiguration.StepInterval * 1_000 - sw.ElapsedMilliseconds) + delta);
-                logger.LogInformation("wait {0}ms", wait);
-                if (wait > 0)
-                {
-                    await Task.Delay(wait, cancellationToken).ConfigureAwait(false);
-                }
-                delta = (delta + simulationConfiguration.StepInterval * 1_000 - sw.ElapsedMilliseconds) / 2;
-            }
-            else
-            {
-                delta = 3_000;
-                await Task.Delay((int)(delta), cancellationToken).ConfigureAwait(false);
-            }
-            logger.LogInformation("Round took {0}ms; delta: {1}ms", sw.ElapsedMilliseconds, delta);
             sw.Restart();
         } while (Autorun);
     }

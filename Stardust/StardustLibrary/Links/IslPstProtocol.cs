@@ -151,11 +151,7 @@ public class IslPstProtocol : IInterSatelliteLinkProtocol
                     }
                 }
             }
-
-            Debug.WriteLine($"From {range.Item1} to {range.Item2} with length {localLinks.Length} but {localLinks.Count(l => l!= null)}");
         });
-
-        Debug.WriteLine($"MST: {mstVertices.Count} {count}");
 
         var established = this.established.ToList();
         foreach (var link in mstVertices)
@@ -174,7 +170,6 @@ public class IslPstProtocol : IInterSatelliteLinkProtocol
         this.established = mstVertices.ToList();
         resetEvent.Set();
 
-        Debug.WriteLine(this.established.Count);
         return Task.FromResult(this.established);
     }
 

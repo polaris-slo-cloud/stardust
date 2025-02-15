@@ -97,6 +97,7 @@ public class PaperWorkflowTestService(ISimulationController simulationController
                         await orchestrator.DeleteDeploymentAsync(specifications[i]);
                     }
 #endif
+                    await Task.Delay(100);
                 }
 
                 string csv = "step_ms,orchestrations_ms\n";
