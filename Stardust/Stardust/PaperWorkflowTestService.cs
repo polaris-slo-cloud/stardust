@@ -35,7 +35,7 @@ public class PaperWorkflowTestService(ISimulationController simulationController
                 for (int step = 0; step < NUM_STEPS; step++)
                 {
                     var sw = Stopwatch.StartNew();
-                    await simulationController.StepAsync(0);
+                    await simulationController.StepAsync(60);
                     steps.Add(sw.ElapsedMilliseconds);
 
                     sw.Restart();
