@@ -32,6 +32,7 @@ public class PaperWorkflowTestService(ISimulationController simulationController
                 List<long> orchestrations = new List<long>();
                 Random r = new(1);
                 var nodes = await simulationController.GetAllNodesAsync();
+                var satellites = await simulationController.GetAllNodesAsync<Satellite>();
                 for (int step = 0; step < NUM_STEPS; step++)
                 {
                     var sw = Stopwatch.StartNew();
@@ -105,7 +106,7 @@ public class PaperWorkflowTestService(ISimulationController simulationController
                 {
                     csv += steps[i] + "," + orchestrations[i] + "\n";
                 }
-                await File.WriteAllTextAsync($"{nodes.Count}.csv", csv);
+                await File.WriteAllTextAsync($"{satellites.Count}.csv", csv);
                 logger.LogInformation("Finished");
                 Environment.Exit(0);
             }
