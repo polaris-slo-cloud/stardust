@@ -5,6 +5,7 @@ using Stardust.Abstraction.Simulation;
 using StardustLibrary.Deployment.Specifications;
 using StardustLibrary.Routing;
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,8 +15,37 @@ public class TaskOrchestrator(ISimulationController simulationController) : IDep
 {
     private readonly ISimulationController simulationController = simulationController;
     private readonly Random random = new(1);
+    private readonly ConcurrentDictionary<TaskSpecification, Node> scheduled = [];
 
     public string[] DeploymentTypes => [TaskSpecification.TYPE];
+
+    public async Task CheckRescheduleAsync(IDeploymentSpecification deployment)
+    {
+        if (deployment is not TaskSpecification taskSpecification)
+        {
+            throw new ArgumentException("Deployment must be a task specification", nameof(deployment));
+        }
+
+        if (!scheduled.TryGetValue(taskSpecification, out var node)) 
+        {
+            throw new ArgumentException("Deployment must already be deployed");
+        }
+
+        IRouteResult route;
+        if (taskSpecification.Node != null)
+        {
+            route = await taskSpecification.Node.Router.RouteAsync(node);
+        } else
+        {
+            route = await node.Router.RouteAsync(taskSpecification.ServiceName!);
+        }
+
+        if (!route.Reachable || route.Latency > taskSpecification.MaxLatency)
+        {
+            await DeleteDeploymentAsync(deployment);
+            await CreateDeploymentAsync(deployment);
+        }
+    }
 
     public async Task CreateDeploymentAsync(IDeploymentSpecification deployment)
     {
@@ -46,10 +76,15 @@ public class TaskOrchestrator(ISimulationController simulationController) : IDep
                 throw new InvalidOperationException("Either node or service name must not be null");
             }
         } while (!route.Reachable || route.Latency > taskSpecification.MaxLatency || !await node.Computing.TryPlaceDeploymentAsync(taskSpecification.Service));
+
+        scheduled[taskSpecification] = node;
     }
 
-    public Task DeleteDeploymentAsync(IDeploymentSpecification deployment)
+    public async Task DeleteDeploymentAsync(IDeploymentSpecification deployment)
     {
-        return Task.CompletedTask;
+        if (deployment is TaskSpecification taskSpecification && scheduled.TryGetValue(taskSpecification, out var node))
+        {
+            await node.Computing.RemoveDeploymentAsync(taskSpecification.Service);
+        }
     }
 }

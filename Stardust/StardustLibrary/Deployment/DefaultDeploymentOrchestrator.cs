@@ -28,6 +28,11 @@ public class DefaultDeploymentOrchestrator(ISimulationController simulationContr
     }
 
 
+    public Task CheckRescheduleAsync(IDeploymentSpecification deployment)
+    {
+        return Task.CompletedTask;
+    }
+
     public async Task CreateDeploymentAsync(IDeploymentSpecification deployment)
     {
         Shuffle();

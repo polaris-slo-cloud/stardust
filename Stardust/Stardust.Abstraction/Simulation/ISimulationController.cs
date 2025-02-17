@@ -1,4 +1,5 @@
 ﻿using Stardust.Abstraction.Computing;
+using Stardust.Abstraction.Deployment;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -39,6 +40,7 @@ public interface ISimulationController
     /// <returns>The task which executes the step</returns>
     public Task StepAsync(double seconds, CancellationToken cancellationToken = default);
 
+    public void Inject(DeploymentOrchestrator orchestrator);
     public Task<List<Node.Node>> GetAllNodesAsync();
     public Task<List<Node.Node>> GetAllNodesAsync(ComputingType computingType);
     public Task<List<T>> GetAllNodesAsync<T>() where T : Node.Node;

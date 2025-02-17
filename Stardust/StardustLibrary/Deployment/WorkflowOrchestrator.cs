@@ -9,6 +9,19 @@ public class WorkflowOrchestrator(TaskOrchestrator taskOrchestrator) : IDeployme
 {
     public string[] DeploymentTypes => [WorkflowSpecification.TYPE];
 
+    public async Task CheckRescheduleAsync(IDeploymentSpecification deployment)
+    {
+        if (deployment is not WorkflowSpecification workflowSpecification)
+        {
+            throw new ArgumentException("Deployment must be a task specification", nameof(deployment));
+        }
+
+        foreach (var task in workflowSpecification.Tasks)
+        {
+            await taskOrchestrator.CheckRescheduleAsync(task);
+        }
+    }
+
     public async Task CreateDeploymentAsync(IDeploymentSpecification deployment)
     {
         if (deployment is not WorkflowSpecification workflowSpecification)

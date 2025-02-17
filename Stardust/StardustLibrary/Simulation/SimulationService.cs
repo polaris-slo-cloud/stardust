@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Stardust.Abstraction.Computing;
+using Stardust.Abstraction.Deployment;
 using Stardust.Abstraction.Node;
 using Stardust.Abstraction.Simulation;
 using StardustLibrary.DataSource.Satellite;
@@ -30,6 +31,7 @@ public class SimulationService : IHostedService, ISimulationController
     private Task runningSimulationTask = Task.CompletedTask;
     private DateTime simTime;
 
+    private DeploymentOrchestrator? orchestrator;
     private readonly List<Node> all = [];
     private List<Satellite> satellites = [];
     private List<GroundStation> groundStations = [];
@@ -53,6 +55,11 @@ public class SimulationService : IHostedService, ISimulationController
         this.StartTime = simTime = this.simulationConfiguration.SimulationStartTime;
     }
 
+    public void Inject(DeploymentOrchestrator orchestrator)
+    {
+        this.orchestrator = orchestrator;
+    }
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Staring simulation ...");    
@@ -69,7 +76,6 @@ public class SimulationService : IHostedService, ISimulationController
 
     private async Task RunSimulationStep(Func<DateTime, DateTime> getSimTime, CancellationToken cancellationToken = default)
     {
-        double delta = 0;
         Stopwatch sw = Stopwatch.StartNew();
         do
         {
@@ -90,6 +96,12 @@ public class SimulationService : IHostedService, ISimulationController
             {
                 Parallel.ForEach(satellites, _parallelOptions, async (s) => await s.Router.CalculateRoutingTableAsync().ConfigureAwait(false));
                 logger.LogInformation("CalculateRoutingTableAsync after {0}ms", sw.ElapsedMilliseconds);
+            }
+
+            if (orchestrator != null)
+            {
+                await orchestrator.CheckRescheduleAsync(null!);
+                logger.LogInformation("Orchestrator Rescheduling after {0}ms", sw.ElapsedMilliseconds);
             }
             sw.Restart();
         } while (Autorun);

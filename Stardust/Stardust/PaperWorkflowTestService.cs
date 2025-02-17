@@ -20,7 +20,7 @@ public class PaperWorkflowTestService(ISimulationController simulationController
     private readonly SimulationConfiguration configuration = configuration.Value;
 
     private const int NUM_STEPS = 100;
-    private const int NUM_SPECS = 1;
+    private const int NUM_SPECS = 100;
     private const int MAX_NUM_TASKS = 5;
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -98,7 +98,6 @@ public class PaperWorkflowTestService(ISimulationController simulationController
                         await orchestrator.DeleteDeploymentAsync(specifications[i]);
                     }
 #endif
-                    await Task.Delay(100);
                 }
 
                 string csv = "step_ms,orchestrations_ms\n";

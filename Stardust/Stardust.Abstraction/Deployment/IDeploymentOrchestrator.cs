@@ -8,4 +8,5 @@ public interface IDeploymentOrchestrator
 
     public Task CreateDeploymentAsync(IDeploymentSpecification deployment);
     public Task DeleteDeploymentAsync(IDeploymentSpecification deployment);
+    public Task CheckRescheduleAsync(IDeploymentSpecification deployment);
 }
