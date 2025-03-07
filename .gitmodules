@@ -1,0 +1,3 @@
+[submodule "Experiments/StarryNet/StarryNet"]
+	path = Experiments/StarryNet/StarryNet
+	url = git@github.com:polaris-slo-cloud/StarryNet.git
