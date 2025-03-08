@@ -1,4 +1,5 @@
 import math
+import os
 import sys
 import time
 
@@ -36,15 +37,18 @@ def run_experiment(sat_count: int):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('Please specify the number of satellites to simulate as the first argument:')
-        print('python experiment.py 200')
+    # We read the number of satellites from an environment variable, because the ArgumentParser in sn_utils raises an error if we add
+    # a mandatory command line parameter.
+    sats_count_str = os.environ.get('STARRYNET_SATS')
+    if sats_count_str is None:
+        print('Please specify the number of satellites to simulate as the environment variable STARRYNET_SATS')
+        print('STARRYNET_SATS=200 python experiment.py')
         exit(1)
     
     try:
-        sat_count = int(sys.argv[1])
+        sat_count = int(sats_count_str)
     except:
-        print(f'{sys.argv[1]} is not an integer')
+        print(f'{sats_count_str} is not an integer')
         exit(1)
     
     start = time.time()
