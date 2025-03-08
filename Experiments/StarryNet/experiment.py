@@ -2,9 +2,7 @@ import math
 import sys
 import time
 
-from StarryNet.starrynet.sn_observer import *
-from StarryNet.starrynet.sn_orchestrater import *
-from StarryNet.starrynet.sn_synchronizer import *
+from starrynet.starrynet.sn_synchronizer import *
 
 
 def run_experiment(sat_count: int):
