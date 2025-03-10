@@ -1,6 +1,6 @@
-# Celestial Experiment Runner
+# Celestial Experiments
 
-This repository contains a Bash script to automate running Celestial experiments. The script modifies satellite configurations, generates network setups, and executes Celestial server and client processes.
+This directory contains a script to automate running Celestial experiments. The script modifies satellite configurations, generates network setups, and executes Celestial server and client processes.
 
 ## What This Script Does
 
