@@ -23,13 +23,13 @@ SATELLITE_CONFIGS=(
 )
 
 OUTPUT_FILE="./experiment.log"
-CELESTIAL_DIR="/home/spock/celestial/quick-start"
-SATGEN_SCRIPT="/home/spock/celestial/satgen.py"
-CELESTIAL_BIN="/home/spock/celestial/celestial.bin"
-CELESTIAL_SCRIPT="/home/spock/celestial/celestial.py"
-VENV_DIR="/home/spock/celestial/.venv"
-SERVER_IP="128.131.57.192"
-NETWORK_INTERFACE="ens3"
+CELESTIAL_DIR="~/celestial/quick-start"
+SATGEN_SCRIPT="~/celestial/satgen.py"
+CELESTIAL_BIN="~/celestial/celestial.bin"
+CELESTIAL_SCRIPT="~/celestial/celestial.py"
+VENV_DIR="~/celestial/.venv"
+SERVER_IP="192.168.0.132"
+NETWORK_INTERFACE="eth0"
 
 # Ensure script runs from Celestial directory
 echo "Navigating to Celestial directory..."
