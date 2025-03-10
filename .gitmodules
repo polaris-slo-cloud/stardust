@@ -1,3 +1,6 @@
 [submodule "Experiments/StarryNet/StarryNet"]
 	path = Experiments/StarryNet/starrynet
 	url = git@github.com:polaris-slo-cloud/StarryNet.git
+[submodule "Experiments/Celestial/celestial"]
+	path = Experiments/Celestial/celestial
+	url = https://github.com/OpenFogStack/celestial
